@@ -55,10 +55,14 @@ invest-sema/
   then `mark`s the ids. No bot, no token — Sema just posts to Telegram as usual.
 
 ## Deployment
-- **Status: NOT yet deployed — Sema reviews locally first, deploy only after his OK.**
-- Deploy = create GitHub repo `lopushokbot/invest-sema`, push, enable Pages (GitHub
-  Actions source). Workflow `.github/workflows/deploy.yml` does build + deploy on push
-  to main, daily at 05:00 UTC (09:00 Dubai, refreshes Telegram feed), and manual dispatch.
+- **Status: LIVE (deployed 2026-07-23) → https://lopushokbot.github.io/invest-sema/**
+- Repo `lopushokbot/invest-sema` (public), Pages source = GitHub Actions.
+  `.github/workflows/deploy.yml` builds + deploys on push to main, daily at 05:00 UTC
+  (09:00 Dubai, refreshes the Telegram feed), and on manual dispatch (`gh workflow run
+  deploy.yml`). To ship changes: commit + push to main → auto-deploys in ~1–2 min.
+- **Posting from the live admin** (`/invest-sema/admin/`): "Sign In Using Access Token"
+  with a GitHub fine-grained PAT (repo `lopushokbot/invest-sema`, Contents: Read+Write).
+  Publish commits to main → auto-deploy. Sema creates the PAT once; nothing else needed.
 
 ## Known Issues & Gotchas
 - `npx astro build` must run **from the project dir** — from elsewhere npx resolves a
