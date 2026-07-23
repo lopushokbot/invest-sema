@@ -4,12 +4,12 @@ on:
   push:
     branches: [main]
   schedule:
-    # Daily 05:00 UTC (09:00 Dubai) — refreshes the Telegram feed
-    - cron: '0 5 * * *'
+    # Daily 19:00 UTC (23:00 Dubai) — auto-publish new Telegram posts + refresh feed
+    - cron: '0 19 * * *'
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write      # allow the auto-publish step to commit new posts
   pages: write
   id-token: write
 
@@ -27,6 +27,28 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+
+      # --- Auto-publish from Telegram (only on the daily run / manual dispatch,
+      #     not on every content push, to avoid re-ingesting on our own commits) ---
+      - name: Pull + publish new Telegram posts
+        if: github.event_name != 'push'
+        run: |
+          node scripts/ingest.mjs pull
+          node scripts/autopublish.mjs
+
+      - name: Commit newly published posts
+        if: github.event_name != 'push'
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            git config user.name "invest-sema-bot"
+            git config user.email "actions@users.noreply.github.com"
+            git add -A
+            git commit -m "Auto-publish from Telegram ($(date -u +%F))"
+            git push
+          else
+            echo "No new posts to publish."
+          fi
+
       - run: npx astro build
       - uses: actions/upload-pages-artifact@v3
         with:

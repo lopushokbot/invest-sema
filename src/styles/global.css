@@ -63,95 +63,123 @@
   --font-serif: 'New York L', 'New York', ui-serif, Georgia, serif;
   --font-body: 'InterVariable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 
+  /* Bloom-inspired palette from the Invest Sema logo (indigo primary, green accent) */
   --bg: #ffffff;
-  --bg-subtle: #f5f5f7;
+  --page-bg: radial-gradient(1100px 720px at 82% -12%, #e6f9ef 0%, rgba(240, 236, 255, 0.9) 44%, #fbfbff 78%);
+  --bg-subtle: #f1eefb;
   --bg-card: #ffffff;
   --bg-elevated: #ffffff;
-  --text: #1d1d1f;
-  --text-secondary: #6e6e73;
-  --text-muted: #86868b;
-  --accent: #0066cc;
-  --accent-hover: #0055ab;
-  --border: rgba(0, 0, 0, 0.08);
-  --border-strong: rgba(0, 0, 0, 0.14);
-  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.06);
-  --shadow-card-hover: 0 2px 4px rgba(0, 0, 0, 0.05), 0 16px 40px rgba(0, 0, 0, 0.1);
-  --header-bg: rgba(255, 255, 255, 0.72);
+  --tint-green: #e7f9f1;
+  --tint-purple: #efeafe;
+  --text: #17163a;
+  --text-secondary: #5a5978;
+  --text-muted: #8b8aa6;
+  --accent: #5a3ce6;
+  --accent-hover: #4a2fd6;
+  --accent-soft: #efeafe;
+  --green: #10d090;
+  --green-ink: #0a9c6c;
+  --green-soft: #e2f8ee;
+  --purple: #5a3ce6;
+  --purple-soft: #efeafe;
+  --border: rgba(23, 22, 58, 0.08);
+  --border-strong: rgba(23, 22, 58, 0.14);
+  --shadow-card: 0 2px 6px rgba(40, 30, 90, 0.05), 0 18px 40px rgba(40, 30, 90, 0.07);
+  --shadow-card-hover: 0 4px 10px rgba(40, 30, 90, 0.08), 0 26px 60px rgba(40, 30, 90, 0.13);
+  --header-bg: rgba(255, 255, 255, 0.7);
 
   /* chart tokens (dataviz palette, validated on these surfaces) */
   --chart-surface: #ffffff;
   --chart-grid: #e8e8ed;
   --chart-baseline: #d2d2d7;
   --chart-ink-muted: #86868b;
-  --series-1: #2a78d6;
-  --series-2: #008300;
+  --series-1: #5a3ce6;
+  --series-2: #0a9c6c;
   --series-3: #e87ba4;
   --series-4: #eda100;
-  --delta-up: #006300;
+  --delta-up: #0a9c6c;
   --delta-down: #d03b3b;
 
-  --radius: 16px;
-  --radius-sm: 12px;
+  --radius: 26px;
+  --radius-sm: 16px;
   --content-width: 1080px;
   --article-width: 680px;
 }
 
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --bg: #000000;
-  --bg-subtle: #0d0d0f;
-  --bg-card: #101012;
-  --bg-elevated: #1c1c1e;
-  --text: #f5f5f7;
-  --text-secondary: #a1a1a6;
-  --text-muted: #86868b;
-  --accent: #2997ff;
-  --accent-hover: #55aeff;
+  --bg: #0a0912;
+  --page-bg: radial-gradient(1100px 720px at 82% -12%, #14231e 0%, #14122a 44%, #0a0912 80%);
+  --bg-subtle: #141227;
+  --bg-card: #17152b;
+  --bg-elevated: #201d38;
+  --tint-green: #12271f;
+  --tint-purple: #1c1838;
+  --text: #f3f2fb;
+  --text-secondary: #a9a7c6;
+  --text-muted: #8785a0;
+  --accent: #9a8cff;
+  --accent-hover: #b0a4ff;
+  --accent-soft: #221d3d;
+  --green: #22e0a0;
+  --green-ink: #22e0a0;
+  --green-soft: #16302433;
+  --purple: #9a8cff;
+  --purple-soft: #221d3d;
   --border: rgba(255, 255, 255, 0.1);
   --border-strong: rgba(255, 255, 255, 0.18);
-  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.5);
-  --shadow-card-hover: 0 2px 4px rgba(0, 0, 0, 0.5), 0 16px 40px rgba(0, 0, 0, 0.6);
-  --header-bg: rgba(0, 0, 0, 0.65);
+  --shadow-card: 0 2px 6px rgba(0, 0, 0, 0.45), 0 18px 44px rgba(0, 0, 0, 0.55);
+  --shadow-card-hover: 0 4px 10px rgba(0, 0, 0, 0.5), 0 26px 64px rgba(0, 0, 0, 0.6);
+  --header-bg: rgba(10, 9, 18, 0.7);
 
-  --chart-surface: #101012;
+  --chart-surface: #17152b;
   --chart-grid: #2c2c2e;
   --chart-baseline: #3a3a3c;
-  --chart-ink-muted: #86868b;
-  --series-1: #3987e5;
-  --series-2: #008300;
+  --chart-ink-muted: #8785a0;
+  --series-1: #9a8cff;
+  --series-2: #22e0a0;
   --series-3: #d55181;
   --series-4: #c98500;
-  --delta-up: #0ca30c;
+  --delta-up: #22e0a0;
   --delta-down: #e66767;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
     color-scheme: dark;
-    --bg: #000000;
-    --bg-subtle: #0d0d0f;
-    --bg-card: #101012;
-    --bg-elevated: #1c1c1e;
-    --text: #f5f5f7;
-    --text-secondary: #a1a1a6;
-    --text-muted: #86868b;
-    --accent: #2997ff;
-    --accent-hover: #55aeff;
+    --bg: #0a0912;
+    --page-bg: radial-gradient(1100px 720px at 82% -12%, #14231e 0%, #14122a 44%, #0a0912 80%);
+    --bg-subtle: #141227;
+    --bg-card: #17152b;
+    --bg-elevated: #201d38;
+    --tint-green: #12271f;
+    --tint-purple: #1c1838;
+    --text: #f3f2fb;
+    --text-secondary: #a9a7c6;
+    --text-muted: #8785a0;
+    --accent: #9a8cff;
+    --accent-hover: #b0a4ff;
+    --accent-soft: #221d3d;
+    --green: #22e0a0;
+    --green-ink: #22e0a0;
+    --green-soft: #16302433;
+    --purple: #9a8cff;
+    --purple-soft: #221d3d;
     --border: rgba(255, 255, 255, 0.1);
     --border-strong: rgba(255, 255, 255, 0.18);
-    --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.5);
-    --shadow-card-hover: 0 2px 4px rgba(0, 0, 0, 0.5), 0 16px 40px rgba(0, 0, 0, 0.6);
-    --header-bg: rgba(0, 0, 0, 0.65);
+    --shadow-card: 0 2px 6px rgba(0, 0, 0, 0.45), 0 18px 44px rgba(0, 0, 0, 0.55);
+    --shadow-card-hover: 0 4px 10px rgba(0, 0, 0, 0.5), 0 26px 64px rgba(0, 0, 0, 0.6);
+    --header-bg: rgba(10, 9, 18, 0.7);
 
-    --chart-surface: #101012;
+    --chart-surface: #17152b;
     --chart-grid: #2c2c2e;
     --chart-baseline: #3a3a3c;
-    --chart-ink-muted: #86868b;
-    --series-1: #3987e5;
-    --series-2: #008300;
+    --chart-ink-muted: #8785a0;
+    --series-1: #9a8cff;
+    --series-2: #22e0a0;
     --series-3: #d55181;
     --series-4: #c98500;
-    --delta-up: #0ca30c;
+    --delta-up: #22e0a0;
     --delta-down: #e66767;
   }
 }
@@ -174,7 +202,9 @@ body {
   font-size: 17px;
   line-height: 1.6;
   color: var(--text);
-  background: var(--bg);
+  background: var(--page-bg) no-repeat, var(--bg);
+  background-attachment: fixed;
+  min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   transition: background 0.3s ease, color 0.3s ease;
@@ -229,13 +259,18 @@ h4 {
   color: var(--text);
 }
 
+/* Bloom-style badge pill */
 .eyebrow {
+  display: inline-block;
   font-family: var(--font-body);
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 12px;
+  font-weight: 650;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--text-muted);
+  color: var(--accent);
+  background: var(--accent-soft);
+  padding: 7px 15px;
+  border-radius: 980px;
 }
 
 /* ---------- Buttons ---------- */
@@ -264,12 +299,12 @@ h4 {
   transform: translateY(-1px);
 }
 .btn-ghost {
-  background: transparent;
+  background: var(--accent-soft);
   color: var(--accent);
-  box-shadow: inset 0 0 0 1px var(--accent);
 }
 .btn-ghost:hover {
-  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  background: color-mix(in srgb, var(--accent) 16%, var(--accent-soft));
+  transform: translateY(-1px);
 }
 
 /* ---------- Cards ---------- */
@@ -290,13 +325,13 @@ a.card:hover,
 .pill {
   display: inline-flex;
   align-items: center;
-  padding: 4px 12px;
+  padding: 5px 13px;
   border-radius: 980px;
   font-size: 12px;
   font-weight: 600;
-  letter-spacing: 0.03em;
-  background: var(--bg-subtle);
-  color: var(--text-secondary);
+  letter-spacing: 0.02em;
+  background: var(--green-soft);
+  color: var(--green-ink);
 }
 
 /* ---------- Scroll reveal ---------- */
@@ -341,6 +376,15 @@ a.card:hover,
 }
 .prose p {
   color: var(--text);
+  text-align: justify;
+  text-justify: inter-word;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+}
+.prose li {
+  text-align: justify;
+  hyphens: auto;
+  -webkit-hyphens: auto;
 }
 .prose strong {
   font-weight: 650;
