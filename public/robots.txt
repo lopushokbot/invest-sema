@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://lopushokbot.github.io/invest-sema/sitemap-index.xml

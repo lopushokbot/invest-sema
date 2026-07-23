@@ -1,0 +1,163 @@
+---
+import Base from '../layouts/Base.astro';
+import LongReadCard from '../components/LongReadCard.astro';
+import SetupCard from '../components/SetupCard.astro';
+import TelegramStrip from '../components/TelegramStrip.astro';
+import { getCollection } from 'astro:content';
+import { SITE, url, formatMonth } from '../lib/config';
+import { fetchTelegramPosts } from '../lib/telegram';
+
+const longreads = (await getCollection('longreads', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.date.getTime() - a.data.date.getTime()
+);
+const setups = (await getCollection('setups', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.date.getTime() - a.data.date.getTime()
+);
+const tgPosts = await fetchTelegramPosts(3);
+
+// The latest month with long reads — its 1–2 pieces headline the front page
+const latestMonth = longreads.length ? formatMonth(longreads[0].data.date) : null;
+const monthPosts = latestMonth
+  ? longreads.filter((p) => formatMonth(p.data.date) === latestMonth)
+  : [];
+const latestSetups = setups.slice(0, 3);
+---
+
+<Base>
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container">
+      <p class="eyebrow reveal">Markets · Crypto · Life</p>
+      <h1 class="reveal">Invest Sema</h1>
+      <p class="hero-sub reveal">{SITE.tagline}</p>
+      <div class="hero-cta reveal">
+        <a class="btn btn-primary" href={SITE.telegramUrl} target="_blank" rel="noopener">
+          Follow on Telegram
+        </a>
+        <a class="btn btn-ghost" href={url('longreads/')}>Read the long reads</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- This month's long read(s) -->
+  {
+    monthPosts.length > 0 && (
+      <section class="section">
+        <div class="container">
+          <div class="section-head reveal">
+            <div>
+              <p class="month-tag">The Long Read</p>
+              <h2>{latestMonth}</h2>
+            </div>
+            <a class="see-all" href={url('longreads/')}>All long reads →</a>
+          </div>
+          <div class="lr-grid">
+            {monthPosts.map((post) => (
+              <LongReadCard post={post} />
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <!-- Weekly setups -->
+  <section class="section alt">
+    <div class="container">
+      <div class="section-head reveal">
+        <h2>Weekly Setups</h2>
+        <a class="see-all" href={url('setups/')}>All setups →</a>
+      </div>
+      <div class="setup-grid">
+        {latestSetups.map((post) => <SetupCard post={post} />)}
+      </div>
+    </div>
+  </section>
+
+  <!-- Telegram -->
+  <section class="section">
+    <div class="container">
+      <div class="section-head reveal">
+        <h2>From Telegram</h2>
+        <a class="see-all" href={url('telegram/')}>See the channel →</a>
+      </div>
+      <TelegramStrip posts={tgPosts} limit={3} />
+    </div>
+  </section>
+</Base>
+
+<style>
+  .hero {
+    padding: 110px 0 72px;
+    text-align: center;
+  }
+  .hero h1 {
+    font-size: clamp(48px, 8vw, 84px);
+    font-weight: 700;
+    margin: 16px 0 20px;
+    letter-spacing: -0.02em;
+  }
+  .hero-sub {
+    font-size: clamp(18px, 2.4vw, 23px);
+    color: var(--text-secondary);
+    max-width: 44ch;
+    margin: 0 auto 36px;
+    line-height: 1.45;
+  }
+  .hero-cta {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .section-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .section-head h2 {
+    font-size: clamp(28px, 3.6vw, 40px);
+  }
+  .month-tag {
+    font-size: 13px;
+    font-weight: 650;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .see-all {
+    font-size: 15px;
+    font-weight: 500;
+    white-space: nowrap;
+    padding-bottom: 4px;
+  }
+  .section.alt {
+    background: var(--bg-subtle);
+  }
+
+  .lr-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(440px, 1fr));
+    gap: 22px;
+  }
+  .setup-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+  }
+  @media (max-width: 560px) {
+    .lr-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .hero {
+      padding: 72px 0 48px;
+    }
+  }
+</style>

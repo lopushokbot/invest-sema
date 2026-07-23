@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.astro/
+.DS_Store
+
+# Transient ingestion cache (pending posts / downloaded before publish)
+scripts/.cache/

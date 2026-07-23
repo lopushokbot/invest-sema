@@ -1,0 +1,85 @@
+---
+import { url, formatDate } from '../lib/config';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  post: CollectionEntry<'setups'>;
+}
+const { post } = Astro.props;
+
+const typeClass: Record<string, string> = {
+  'Trade idea': 'type-trade',
+  Watchlist: 'type-watch',
+  'Quick take': 'type-quick',
+};
+---
+
+<a class="card su-card reveal" href={url(`setups/${post.id}/`)}>
+  <div class="su-head">
+    <span class={`su-type ${typeClass[post.data.type]}`}>{post.data.type}</span>
+    <time class="su-date" datetime={post.data.date.toISOString()}>
+      {formatDate(post.data.date)}
+    </time>
+  </div>
+  <h3 class="su-title">{post.data.title}</h3>
+  <p class="su-desc">{post.data.description}</p>
+  <span class="su-more">Read setup →</span>
+</a>
+
+<style>
+  .su-card {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 24px;
+    color: inherit;
+  }
+  .su-card:hover {
+    color: inherit;
+  }
+  .su-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .su-type {
+    font-size: 11.5px;
+    font-weight: 650;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .type-trade {
+    color: var(--accent);
+  }
+  .type-watch {
+    color: var(--delta-up);
+  }
+  .type-quick {
+    color: var(--text-muted);
+  }
+  .su-date {
+    font-size: 12.5px;
+    color: var(--text-muted);
+  }
+  .su-title {
+    font-size: 19px;
+    line-height: 1.25;
+  }
+  .su-desc {
+    font-size: 14.5px;
+    line-height: 1.55;
+    color: var(--text-secondary);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .su-more {
+    margin-top: auto;
+    padding-top: 6px;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--accent);
+  }
+</style>

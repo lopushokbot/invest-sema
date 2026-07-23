@@ -1,0 +1,168 @@
+# Invest Sema — admin (Sveltia CMS)
+# Two sections: Long Reads and Weekly Setups. Publish = commit to GitHub = auto-deploy.
+
+backend:
+  name: github
+  repo: lopushokbot/invest-sema
+  branch: main
+  # For posting from anywhere (phone/browser), an OAuth login URL is added here at
+  # deploy time. Until then, use the local admin (npm run admin) which needs no login.
+  # base_url: https://<cloudflare-worker-url>
+
+# Lets `npm run admin` write posts straight to disk locally, no login required.
+local_backend: true
+
+site_url: https://lopushokbot.github.io/invest-sema/
+display_url: https://lopushokbot.github.io/invest-sema/
+
+# Uploaded images (covers, in-body photos) go here; the public path carries the base.
+media_folder: "public/images/uploads"
+public_folder: "/invest-sema/images/uploads"
+
+# Show a friendly editing experience
+editor:
+  preview: false
+
+collections:
+  # ------------------------------------------------------------------ LONG READS
+  - name: longreads
+    label: "Long Reads"
+    label_singular: "Long Read"
+    description: "The monthly deep post — one per month."
+    folder: "src/content/longreads"
+    create: true
+    delete: true
+    slug: "{{year}}-{{month}}-{{slug}}"
+    extension: md
+    format: frontmatter
+    summary: "{{fields.date | date('MMM YYYY')}} — {{title}}"
+    sortable_fields: [date, title]
+    view_filters:
+      - { label: "Published", field: draft, pattern: false }
+      - { label: "Drafts", field: draft, pattern: true }
+    fields:
+      - { name: title, label: "Title", widget: string }
+      - {
+          name: description,
+          label: "Summary",
+          hint: "1–2 sentences shown on cards and in link previews.",
+          widget: text,
+        }
+      - {
+          name: date,
+          label: "Date",
+          widget: datetime,
+          date_format: "YYYY-MM-DD",
+          time_format: false,
+          format: "YYYY-MM-DD",
+        }
+      - {
+          name: markets,
+          label: "Markets",
+          widget: select,
+          multiple: true,
+          required: false,
+          default: [],
+          options:
+            [
+              { label: "US market", value: "US" },
+              { label: "Crypto market", value: "Crypto" },
+              { label: "Russian market", value: "Russia" },
+            ],
+          hint: "Which market(s) this is about — powers the filter buttons.",
+        }
+      - {
+          name: tags,
+          label: "Tags",
+          widget: list,
+          required: false,
+          default: [],
+          hint: "Optional free-form labels, e.g. Macro, Equities.",
+        }
+      - {
+          name: cover,
+          label: "Cover image",
+          widget: image,
+          required: false,
+          choose_url: false,
+          hint: "Optional. Wide image shown at the top of the post.",
+        }
+      - {
+          name: draft,
+          label: "Draft (hide from the site)",
+          widget: boolean,
+          default: false,
+          required: false,
+        }
+      - { name: body, label: "Post", widget: markdown }
+
+  # ---------------------------------------------------------------- WEEKLY SETUPS
+  - name: setups
+    label: "Weekly Setups"
+    label_singular: "Setup"
+    description: "Short, dated ideas and setups."
+    folder: "src/content/setups"
+    create: true
+    delete: true
+    slug: "{{year}}-{{month}}-{{slug}}"
+    extension: md
+    format: frontmatter
+    summary: "{{fields.date | date('DD MMM YYYY')}} — {{title}}"
+    sortable_fields: [date, title]
+    view_filters:
+      - { label: "Published", field: draft, pattern: false }
+      - { label: "Drafts", field: draft, pattern: true }
+    fields:
+      - { name: title, label: "Title", widget: string }
+      - {
+          name: description,
+          label: "Summary",
+          hint: "1–2 sentences shown on the setup card.",
+          widget: text,
+        }
+      - {
+          name: date,
+          label: "Date",
+          widget: datetime,
+          date_format: "YYYY-MM-DD",
+          time_format: false,
+          format: "YYYY-MM-DD",
+        }
+      - {
+          name: type,
+          label: "Type",
+          widget: select,
+          options: ["Trade idea", "Watchlist", "Quick take"],
+          default: "Quick take",
+        }
+      - {
+          name: markets,
+          label: "Markets",
+          widget: select,
+          multiple: true,
+          required: false,
+          default: [],
+          options:
+            [
+              { label: "US market", value: "US" },
+              { label: "Crypto market", value: "Crypto" },
+              { label: "Russian market", value: "Russia" },
+            ],
+          hint: "Which market(s) this is about — powers the filter buttons.",
+        }
+      - {
+          name: tags,
+          label: "Tags",
+          widget: list,
+          required: false,
+          default: [],
+          hint: "Optional free-form labels, e.g. Macro, Equities.",
+        }
+      - {
+          name: draft,
+          label: "Draft (hide from the site)",
+          widget: boolean,
+          default: false,
+          required: false,
+        }
+      - { name: body, label: "Post", widget: markdown }

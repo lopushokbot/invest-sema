@@ -1,0 +1,66 @@
+---
+/**
+ * Photo grid for articles. Usage in MDX:
+ *   <Gallery images={[
+ *     { src: '/images/my-post/one.jpg', alt: 'Desk setup' },
+ *     { src: '/images/my-post/two.jpg', alt: 'Skyline' },
+ *   ]} />
+ * Paths are relative to public/ (leading slash, without the site base).
+ */
+import { url } from '../lib/config';
+
+interface Img {
+  src: string;
+  alt?: string;
+  caption?: string;
+}
+interface Props {
+  images: Img[];
+}
+const { images } = Astro.props;
+const cols = images.length === 1 ? 1 : images.length === 2 || images.length === 4 ? 2 : 3;
+---
+
+<div class="gallery" style={`--cols: ${cols}`}>
+  {
+    images.map((img) => (
+      <figure class="g-item">
+        <img src={img.src.startsWith('http') ? img.src : url(img.src)} alt={img.alt ?? ''} loading="lazy" />
+        {img.caption && <figcaption>{img.caption}</figcaption>}
+      </figure>
+    ))
+  }
+</div>
+
+<style>
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(var(--cols), 1fr);
+    gap: 12px;
+    margin: 2em 0;
+  }
+  .g-item {
+    margin: 0;
+  }
+  .g-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+    aspect-ratio: 4 / 3;
+  }
+  .g-item figcaption {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 8px;
+    text-align: center;
+  }
+  @media (max-width: 560px) {
+    .gallery {
+      grid-template-columns: 1fr;
+    }
+    .g-item img {
+      aspect-ratio: 16 / 10;
+    }
+  }
+</style>

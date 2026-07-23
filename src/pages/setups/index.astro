@@ -1,0 +1,166 @@
+---
+import Base from '../../layouts/Base.astro';
+import SetupCard from '../../components/SetupCard.astro';
+import { getCollection } from 'astro:content';
+import { formatMonth, MARKETS } from '../../lib/config';
+
+const posts = (await getCollection('setups', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.date.getTime() - a.data.date.getTime()
+);
+
+// Group by month, newest first
+const groups: { month: string; posts: typeof posts }[] = [];
+for (const post of posts) {
+  const month = formatMonth(post.data.date);
+  const last = groups[groups.length - 1];
+  if (last && last.month === month) last.posts.push(post);
+  else groups.push({ month, posts: [post] });
+}
+---
+
+<Base
+  title="Weekly Setups"
+  description="Short, dated ideas and setups across the US, crypto and Russian markets."
+>
+  <section class="page-hero">
+    <div class="container">
+      <p class="eyebrow reveal">Weekly · Month by month</p>
+      <h1 class="reveal">Setups & Ideas</h1>
+      <p class="page-sub reveal">
+        Short, dated notes on what looks interesting right now — a setup and the reasoning.
+        Filter by market, skim in two minutes.
+      </p>
+    </div>
+  </section>
+
+  <section class="container list-wrap">
+    <div class="filter-row reveal" data-filter-row>
+      <button class="filter-btn is-active" data-market="all">All markets</button>
+      {MARKETS.map((m) => <button class="filter-btn" data-market={m.id}>{m.label}</button>)}
+    </div>
+
+    <div data-groups>
+      {
+        groups.map((g) => (
+          <div class="month-group" data-month-group>
+            <div class="month-head reveal">
+              <h2 class="month-label">{g.month}</h2>
+              <span class="month-count">
+                {g.posts.length} {g.posts.length === 1 ? 'setup' : 'setups'}
+              </span>
+            </div>
+            <div class="su-grid">
+              {g.posts.map((post) => (
+                <div class="su-item" data-markets={post.data.markets.join(' ')}>
+                  <SetupCard post={post} />
+                </div>
+              ))}
+            </div>
+          </div>
+        ))
+      }
+    </div>
+    <p class="empty" data-empty hidden>Nothing in this market yet.</p>
+    {posts.length === 0 && <p class="empty">First setups drop this week.</p>}
+  </section>
+</Base>
+
+<script>
+  const row = document.querySelector('[data-filter-row]');
+  const emptyMsg = document.querySelector('[data-empty]') as HTMLElement | null;
+  if (row) {
+    row.addEventListener('click', (e) => {
+      const btn = (e.target as HTMLElement).closest('.filter-btn') as HTMLElement | null;
+      if (!btn) return;
+      row.querySelectorAll('.filter-btn').forEach((b) => b.classList.remove('is-active'));
+      btn.classList.add('is-active');
+      const market = btn.dataset.market!;
+      let anyVisible = false;
+      document.querySelectorAll<HTMLElement>('[data-month-group]').forEach((group) => {
+        let groupVisible = false;
+        group.querySelectorAll<HTMLElement>('.su-item').forEach((item) => {
+          const markets = (item.dataset.markets || '').split(' ').filter(Boolean);
+          const show = market === 'all' || markets.includes(market);
+          item.style.display = show ? '' : 'none';
+          if (show) groupVisible = true;
+        });
+        group.style.display = groupVisible ? '' : 'none';
+        if (groupVisible) anyVisible = true;
+      });
+      if (emptyMsg) emptyMsg.hidden = anyVisible;
+    });
+  }
+</script>
+
+<style>
+  .page-hero {
+    padding: 88px 0 40px;
+  }
+  .page-hero h1 {
+    font-size: clamp(40px, 6vw, 64px);
+    margin: 12px 0 16px;
+  }
+  .page-sub {
+    font-size: 19px;
+    color: var(--text-secondary);
+    max-width: 56ch;
+    line-height: 1.55;
+  }
+  .list-wrap {
+    padding-bottom: 40px;
+  }
+  .filter-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 36px;
+  }
+  .filter-btn {
+    padding: 8px 18px;
+    border-radius: 980px;
+    border: 1px solid var(--border-strong);
+    background: transparent;
+    color: var(--text-secondary);
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.25s ease;
+  }
+  .filter-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .filter-btn.is-active {
+    background: var(--text);
+    border-color: var(--text);
+    color: var(--bg);
+  }
+  .month-group {
+    margin-bottom: 52px;
+  }
+  .month-head {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    margin-bottom: 22px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .month-label {
+    font-size: clamp(24px, 3vw, 32px);
+  }
+  .month-count {
+    font-size: 13.5px;
+    color: var(--text-muted);
+  }
+  .su-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+  }
+  .empty {
+    color: var(--text-muted);
+    padding: 40px 0;
+  }
+</style>

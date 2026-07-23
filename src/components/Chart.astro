@@ -1,0 +1,445 @@
+---
+/**
+ * Apple-style build-time SVG chart with hover tooltips.
+ * Types: line | area | bar. Max 4 series (validated palette cap).
+ * Series are always direct-labeled (relief rule for light-mode slots 3-4).
+ *
+ * Usage in MDX:
+ *   <Chart
+ *     title="Stablecoin supply, $B"
+ *     type="area"
+ *     labels={['Jan','Feb','Mar']}
+ *     series={[{ name: 'USDT', values: [95, 102, 110] }]}
+ *     suffix="B" prefix="$"
+ *   />
+ */
+interface Series {
+  name: string;
+  values: number[];
+}
+interface Props {
+  title: string;
+  type?: 'line' | 'area' | 'bar';
+  labels: string[];
+  series: Series[];
+  prefix?: string;
+  suffix?: string;
+  height?: number;
+  note?: string;
+}
+
+const { title, type = 'line', labels, series, prefix = '', suffix = '', height = 300, note } =
+  Astro.props;
+
+const S = series.slice(0, 4); // hard cap — palette validated to 4 slots
+const W = 760;
+const H = height;
+const ML = 52;
+const MR = S.length > 0 && type !== 'bar' ? 16 + Math.max(...S.map((s) => s.name.length)) * 7.2 : 20;
+const MT = 12;
+const MB = 30;
+const plotW = W - ML - MR;
+const plotH = H - MT - MB;
+
+const allVals = S.flatMap((s) => s.values);
+let vMin = Math.min(...allVals);
+let vMax = Math.max(...allVals);
+if (type === 'bar') vMin = Math.min(0, vMin);
+if (vMin === vMax) {
+  vMin -= 1;
+  vMax += 1;
+}
+
+// nice ticks
+function niceStep(range: number, target: number): number {
+  const raw = range / target;
+  const mag = Math.pow(10, Math.floor(Math.log10(raw)));
+  for (const m of [1, 2, 2.5, 5, 10]) {
+    if (raw <= m * mag) return m * mag;
+  }
+  return 10 * mag;
+}
+const step = niceStep(vMax - vMin, 4);
+const tickMin = Math.floor(vMin / step) * step;
+const tickMax = Math.ceil(vMax / step) * step;
+const ticks: number[] = [];
+for (let t = tickMin; t <= tickMax + 1e-9; t += step) ticks.push(+t.toFixed(10));
+
+const y = (v: number) => MT + plotH - ((v - tickMin) / (tickMax - tickMin)) * plotH;
+const x = (i: number) =>
+  type === 'bar'
+    ? ML + (plotW / labels.length) * (i + 0.5)
+    : ML + (labels.length === 1 ? plotW / 2 : (plotW / (labels.length - 1)) * i);
+
+function fmt(v: number): string {
+  const abs = Math.abs(v);
+  let s: string;
+  if (abs >= 1e9) s = (v / 1e9).toFixed(1).replace(/\.0$/, '') + 'B';
+  else if (abs >= 1e6) s = (v / 1e6).toFixed(1).replace(/\.0$/, '') + 'M';
+  else if (abs >= 1e4) s = (v / 1e3).toFixed(1).replace(/\.0$/, '') + 'k';
+  else s = abs >= 100 ? v.toFixed(0) : +v.toFixed(2) + '';
+  return prefix + s + suffix;
+}
+
+// paths for line/area
+const paths = S.map((s) => {
+  const pts = s.values.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`);
+  const line = 'M' + pts.join(' L');
+  const area =
+    line +
+    ` L${x(s.values.length - 1).toFixed(1)},${y(tickMin).toFixed(1)} L${x(0).toFixed(1)},${y(tickMin).toFixed(1)} Z`;
+  return { line, area };
+});
+
+// bar geometry
+const groupW = plotW / labels.length;
+const barGap = 2;
+const barW = Math.min(28, (groupW * 0.62 - barGap * (S.length - 1)) / Math.max(S.length, 1));
+
+// x labels: thin to ~8 max
+const xEvery = Math.max(1, Math.ceil(labels.length / 8));
+
+const chartData = JSON.stringify({
+  labels,
+  series: S.map((s, si) => ({ name: s.name, values: s.values, slot: si + 1 })),
+  prefix,
+  suffix,
+  type,
+  geom: { ML, MR, MT, MB, W, H, tickMin, tickMax },
+});
+---
+
+<figure class="viz-chart" data-chart={chartData}>
+  <figcaption class="viz-title">{title}</figcaption>
+  <div class="viz-frame">
+    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={title}>
+      <!-- grid -->
+      {ticks.map((t) => (
+        <g>
+          <line
+            x1={ML}
+            x2={W - MR}
+            y1={y(t)}
+            y2={y(t)}
+            class={t === tickMin || (type === 'bar' && t === 0) ? 'viz-baseline' : 'viz-grid'}
+          />
+          <text x={ML - 8} y={y(t) + 4} class="viz-ylabel" text-anchor="end">
+            {fmt(t)}
+          </text>
+        </g>
+      ))}
+
+      <!-- x labels -->
+      {labels.map((l, i) =>
+        i % xEvery === 0 ? (
+          <text x={x(i)} y={H - 8} class="viz-xlabel" text-anchor="middle">
+            {l}
+          </text>
+        ) : null
+      )}
+
+      <!-- marks -->
+      {type === 'bar'
+        ? S.map((s, si) =>
+            s.values.map((v, i) => {
+              const gx = ML + groupW * i + (groupW - (barW * S.length + barGap * (S.length - 1))) / 2;
+              const bx = gx + si * (barW + barGap);
+              const y0 = y(Math.max(0, Math.min(v, 0) === v ? 0 : v));
+              const yTop = v >= 0 ? y(v) : y(0);
+              const h = Math.abs(y(v) - y(0));
+              return (
+                <rect
+                  x={bx.toFixed(1)}
+                  y={yTop.toFixed(1)}
+                  width={barW.toFixed(1)}
+                  height={Math.max(h, 1).toFixed(1)}
+                  rx="4"
+                  class={`viz-bar viz-s${si + 1}`}
+                  data-i={i}
+                  data-si={si}
+                />
+              );
+            })
+          )
+        : S.map((s, si) => (
+            <g>
+              {type === 'area' && (
+                <path d={paths[si].area} class={`viz-area viz-s${si + 1}`} />
+              )}
+              <path d={paths[si].line} class={`viz-line viz-s${si + 1}`} />
+              <text
+                x={x(s.values.length - 1) + 10}
+                y={y(s.values[s.values.length - 1]) + 4}
+                class={`viz-endlabel viz-ts${si + 1}`}
+              >
+                {s.name}
+              </text>
+            </g>
+          ))}
+
+      <!-- hover layer targets -->
+      {type !== 'bar' && (
+        <g class="viz-hover-layer">
+          <line class="viz-crosshair" y1={MT} y2={MT + plotH} x1="-10" x2="-10" />
+          {S.map((s, si) => (
+            <circle class={`viz-dot viz-ds${si + 1}`} r="4.5" cx="-10" cy="-10" />
+          ))}
+        </g>
+      )}
+    </svg>
+    <div class="viz-tooltip" hidden></div>
+  </div>
+  {S.length > 1 && (
+    <div class="viz-legend">
+      {S.map((s, si) => (
+        <span class="viz-key">
+          <span class={`viz-swatch viz-s${si + 1}`}></span>
+          {s.name}
+        </span>
+      ))}
+    </div>
+  )}
+  {note && <p class="viz-note">{note}</p>}
+</figure>
+
+<script>
+  function initChart(fig: Element) {
+    const data = JSON.parse((fig as HTMLElement).dataset.chart!);
+    const svg = fig.querySelector('svg')!;
+    const tip = fig.querySelector('.viz-tooltip') as HTMLElement;
+    const frame = fig.querySelector('.viz-frame') as HTMLElement;
+    const { labels, series, prefix, suffix, type, geom } = data;
+
+    const fmt = (v: number) => {
+      const abs = Math.abs(v);
+      let s: string;
+      if (abs >= 1e9) s = (v / 1e9).toFixed(1).replace(/\.0$/, '') + 'B';
+      else if (abs >= 1e6) s = (v / 1e6).toFixed(1).replace(/\.0$/, '') + 'M';
+      else if (abs >= 1e4) s = (v / 1e3).toFixed(1).replace(/\.0$/, '') + 'k';
+      else s = abs >= 100 ? v.toFixed(0) : String(+v.toFixed(2));
+      return prefix + s + suffix;
+    };
+
+    const showTip = (label: string, rows: string, cx: number, cy: number) => {
+      tip.innerHTML = `<div class="viz-tip-label">${label}</div>${rows}`;
+      tip.hidden = false;
+      const fr = frame.getBoundingClientRect();
+      const tr = tip.getBoundingClientRect();
+      let left = cx - fr.left + 14;
+      if (left + tr.width > fr.width - 8) left = cx - fr.left - tr.width - 14;
+      let top = Math.min(Math.max(8, cy - fr.top - tr.height / 2), fr.height - tr.height - 8);
+      tip.style.left = left + 'px';
+      tip.style.top = top + 'px';
+    };
+
+    if (type === 'bar') {
+      svg.addEventListener('mousemove', (e) => {
+        const t = e.target as SVGElement;
+        if (!t.classList.contains('viz-bar')) {
+          tip.hidden = true;
+          return;
+        }
+        const i = +t.dataset.i!;
+        const si = +t.dataset.si!;
+        const s = series[si];
+        showTip(
+          labels[i],
+          `<div class="viz-tip-row"><span class="viz-swatch viz-s${si + 1}"></span>${s.name ? s.name + ' · ' : ''}<b>${fmt(s.values[i])}</b></div>`,
+          e.clientX,
+          e.clientY
+        );
+      });
+      svg.addEventListener('mouseleave', () => (tip.hidden = true));
+      return;
+    }
+
+    // line/area: nearest-index crosshair
+    const cross = svg.querySelector('.viz-crosshair') as SVGLineElement;
+    const dots = Array.from(svg.querySelectorAll('.viz-dot')) as SVGCircleElement[];
+    const { ML, MR, MT, MB, W, H, tickMin, tickMax } = geom;
+    const plotW = W - ML - MR;
+    const plotH = H - MT - MB;
+    const xPos = (i: number) =>
+      ML + (labels.length === 1 ? plotW / 2 : (plotW / (labels.length - 1)) * i);
+    const yPos = (v: number) => MT + plotH - ((v - tickMin) / (tickMax - tickMin)) * plotH;
+
+    svg.addEventListener('mousemove', (e) => {
+      const rect = svg.getBoundingClientRect();
+      const sx = ((e.clientX - rect.left) / rect.width) * W;
+      if (sx < ML - 10 || sx > W - MR + 10) {
+        cross.setAttribute('x1', '-10');
+        cross.setAttribute('x2', '-10');
+        dots.forEach((d) => d.setAttribute('cx', '-10'));
+        tip.hidden = true;
+        return;
+      }
+      const i = Math.round(
+        labels.length === 1 ? 0 : ((sx - ML) / plotW) * (labels.length - 1)
+      );
+      const ci = Math.max(0, Math.min(labels.length - 1, i));
+      const cx = xPos(ci);
+      cross.setAttribute('x1', String(cx));
+      cross.setAttribute('x2', String(cx));
+      series.forEach((s: any, si: number) => {
+        dots[si].setAttribute('cx', String(cx));
+        dots[si].setAttribute('cy', String(yPos(s.values[ci])));
+      });
+      const rows = series
+        .map(
+          (s: any, si: number) =>
+            `<div class="viz-tip-row"><span class="viz-swatch viz-s${si + 1}"></span>${series.length > 1 ? s.name + ' ' : ''}<b>${fmt(s.values[ci])}</b></div>`
+        )
+        .join('');
+      const px = rect.left + (cx / W) * rect.width;
+      showTip(labels[ci], rows, px, e.clientY);
+    });
+    svg.addEventListener('mouseleave', () => {
+      cross.setAttribute('x1', '-10');
+      cross.setAttribute('x2', '-10');
+      dots.forEach((d) => d.setAttribute('cx', '-10'));
+      tip.hidden = true;
+    });
+  }
+
+  document.querySelectorAll('.viz-chart').forEach(initChart);
+</script>
+
+<style>
+  .viz-chart {
+    margin: 2em 0;
+    padding: 20px 20px 16px;
+    background: var(--chart-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+  .viz-title {
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 12px;
+  }
+  .viz-frame {
+    position: relative;
+  }
+  svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .viz-grid {
+    stroke: var(--chart-grid);
+    stroke-width: 1;
+  }
+  .viz-baseline {
+    stroke: var(--chart-baseline);
+    stroke-width: 1;
+  }
+  .viz-ylabel,
+  .viz-xlabel {
+    font-family: var(--font-body);
+    font-size: 11px;
+    fill: var(--chart-ink-muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .viz-line {
+    fill: none;
+    stroke-width: 2;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .viz-area {
+    opacity: 0.12;
+    stroke: none;
+  }
+  .viz-bar {
+    stroke: var(--chart-surface);
+    stroke-width: 0;
+  }
+  .viz-endlabel {
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 600;
+  }
+  /* series colors — stroke for lines, fill for bars/areas/swatches */
+  .viz-line.viz-s1 { stroke: var(--series-1); }
+  .viz-line.viz-s2 { stroke: var(--series-2); }
+  .viz-line.viz-s3 { stroke: var(--series-3); }
+  .viz-line.viz-s4 { stroke: var(--series-4); }
+  .viz-area.viz-s1, .viz-bar.viz-s1 { fill: var(--series-1); }
+  .viz-area.viz-s2, .viz-bar.viz-s2 { fill: var(--series-2); }
+  .viz-area.viz-s3, .viz-bar.viz-s3 { fill: var(--series-3); }
+  .viz-area.viz-s4, .viz-bar.viz-s4 { fill: var(--series-4); }
+  .viz-ts1 { fill: var(--series-1); }
+  .viz-ts2 { fill: var(--series-2); }
+  .viz-ts3 { fill: var(--series-3); }
+  .viz-ts4 { fill: var(--series-4); }
+  .viz-dot {
+    fill: var(--chart-surface);
+    stroke-width: 2;
+  }
+  .viz-ds1 { stroke: var(--series-1); }
+  .viz-ds2 { stroke: var(--series-2); }
+  .viz-ds3 { stroke: var(--series-3); }
+  .viz-ds4 { stroke: var(--series-4); }
+  .viz-crosshair {
+    stroke: var(--chart-baseline);
+    stroke-width: 1;
+    stroke-dasharray: 3 3;
+  }
+  .viz-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-top: 10px;
+  }
+  .viz-key {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+  .viz-note {
+    margin-top: 10px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+</style>
+
+<style is:global>
+  .viz-swatch {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+  }
+  .viz-swatch.viz-s1 { background: var(--series-1); }
+  .viz-swatch.viz-s2 { background: var(--series-2); }
+  .viz-swatch.viz-s3 { background: var(--series-3); }
+  .viz-swatch.viz-s4 { background: var(--series-4); }
+  .viz-tooltip {
+    position: absolute;
+    z-index: 10;
+    pointer-events: none;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-strong);
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 12.5px;
+    box-shadow: var(--shadow-card);
+    color: var(--text);
+    white-space: nowrap;
+  }
+  .viz-tip-label {
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: var(--text-secondary);
+  }
+  .viz-tip-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-variant-numeric: tabular-nums;
+  }
+</style>
