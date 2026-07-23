@@ -1,8 +1,9 @@
 # Auto-publish playbook — Telegram → Invest Sema
 
-> This is the exact procedure the **daily publishing agent** follows. A human never
-> writes posts here; the agent categorizes Sema's real Telegram posts and publishes
-> them **verbatim**. Sema's rules are absolute — read them before touching anything.
+> **IMPLEMENTED as code:** `scripts/autopublish.mjs` (run by GitHub Actions daily, 23:00
+> Dubai) encodes the rules below deterministically — no human/LLM in the loop. This doc is
+> the spec for that script and the guide for anyone publishing/tuning by hand. Sema's rules
+> below are absolute; posts are always **verbatim** (only frontmatter is authored).
 
 ## Non-negotiable rules
 1. **VERBATIM.** Never rewrite, translate, summarize, or "improve" Sema's text. Copy it

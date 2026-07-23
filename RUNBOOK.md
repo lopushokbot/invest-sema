@@ -12,34 +12,38 @@
 | Publish a long read | Admin → Long Reads → New, OR add file to `src/content/longreads/`, build, push |
 | Publish a setup | Admin → Weekly Setups → New, OR add file to `src/content/setups/`, build, push |
 | Refresh Telegram feed | Any rebuild/deploy does it (daily action also does it) |
-| **Auto-publish new TG posts** | `npm run ingest` → follow `scripts/PUBLISH_PLAYBOOK.md` |
+| **Auto-publish new TG posts** | Automatic — GitHub Actions daily 23:00 Dubai (`ingest.mjs`+`autopublish.mjs`). See task below |
 
 ---
 
-## Task: Auto-publish new Telegram posts (daily agent)
+## Task: Auto-publish new Telegram posts — FULLY AUTOMATED (no action needed)
 
 ### What it does
-Sema posts to @investsyoma as usual. A scheduled agent picks up new posts, decides
-Long Read vs Weekly Setup vs skip, and publishes them **verbatim** to the site.
+Sema posts to @investsyoma as usual. **GitHub Actions** (`deploy.yml`, daily 19:00 UTC /
+23:00 Dubai) runs `ingest.mjs pull` → `autopublish.mjs`, which categorizes new posts
+(Long Read vs Setup vs skip), writes them **verbatim**, commits + pushes, and redeploys.
+Nothing to run by hand. It's deterministic (no LLM) so it always behaves the same.
 
-### Steps
-1. `cd /Users/iibot/Documents/ppppp/workspace/invest-sema && npm run ingest`
-   (= `node scripts/ingest.mjs pull`) — writes `scripts/.cache/pending.json`.
-2. Open `scripts/PUBLISH_PLAYBOOK.md` and follow it **exactly** — it is the full,
-   self-contained procedure (triage → category by monthly word-count → write verbatim
-   file → `node scripts/ingest.mjs mark <ids>` → build → commit → push).
-3. The GitHub Action rebuilds & deploys on push (once the repo exists).
+### How categorization works (`scripts/autopublish.mjs`)
+- **SKIP** if: media-only, <25 words, matches a service/promo/weather pattern, or contains
+  no finance keyword. Skipped ids are still recorded in `seen.json` so they don't resurface.
+- **PUBLISH** (has finance signal + ≥25 words): title = his first sentence; description,
+  tags, markets from keyword lexicons; **≥150 words → long read**, else **setup** (with a
+  `type:`). Body is byte-for-byte his; photos + Telegram footer link appended.
+- Borderline posts are skipped on purpose → Sema hand-publishes via `/admin` if he wants.
 
-### Key rules (also in the playbook)
-- Text is **verbatim** — only frontmatter is authored. Only investing content is published;
-  chatter/photos/service lines are skipped (but still `mark`ed so they don't resurface).
-- **Classify by substance**: long read = substantial analysis/deep-dive/how-to (~150+ words);
-  setup = shorter take/call/review/news. Multiple long reads per month OK; some months none.
+### To test / run on demand
+`gh workflow run deploy.yml --repo lopushokbot/invest-sema` then
+`gh run watch <id> --repo lopushokbot/invest-sema`. Locally you can dry-run the brain:
+`npm run ingest` (writes `.cache/pending.json`) then `node scripts/autopublish.mjs`.
 
-### Scheduling (activates at deploy)
-Cloud routine, daily ~09:30 Dubai (after the 09:00 feed rebuild). Create with the
-`/schedule` skill once the repo is live: prompt = "cd into the invest-sema repo, run
-`npm run ingest`, then follow scripts/PUBLISH_PLAYBOOK.md to publish any new posts."
+### Tuning
+Edit the `FIN` / `MARKET_KW` / `TAG_KW` / `SKIP_RE` lexicons and `*_MIN_WORDS` at the top
+of `scripts/autopublish.mjs`. Verify with the local dry-run before pushing.
+
+### Retired
+The claude.ai cloud routine `trig_01C24ejwKJ1Sa8QAPQXXsNa2` is **disabled** — it could not
+push to the repo and its runs weren't observable. Do not re-enable; CI is the mechanism.
 
 ---
 

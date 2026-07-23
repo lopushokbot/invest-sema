@@ -47,19 +47,30 @@ invest-sema/
 - **Telegram feed**: `https://t.me/s/investsyoma` scraped at build time (regex over the
   public preview page — no API key). Returns [] on any failure; UI falls back to a
   subscribe card. Feed freshness = last build; daily scheduled build keeps it ≤24h old.
-- **Auto-publish ingestion** (`scripts/ingest.mjs`): same public-preview scrape, but for
-  turning new posts into content. `pull` keys on `data-post` (ignores album-child media
-  ids), dedups against every content file's footer link + `seen.json`, downloads photos to
-  `public/images/tg/<id>.jpg`, writes `scripts/.cache/pending.json`. The daily agent reads
-  that manifest and follows `scripts/PUBLISH_PLAYBOOK.md` to categorize + publish verbatim,
-  then `mark`s the ids. No bot, no token — Sema just posts to Telegram as usual.
+- **Auto-publish (runs inside GitHub Actions, daily 19:00 UTC / 23:00 Dubai)**: two-step
+  pipeline, no LLM, no bot, no token — Sema just posts to @investsyoma as usual.
+  1. `scripts/ingest.mjs pull` — public-preview scrape; keys on `data-post` (ignores
+     album-child media ids), dedups against every content file's footer link + `seen.json`,
+     downloads photos to `public/images/tg/<id>.jpg`, writes `scripts/.cache/pending.json`.
+  2. `scripts/autopublish.mjs` — deterministic categorizer: SKIP (media-only, <25 words,
+     service/promo/weather patterns, or no finance keyword) vs PUBLISH; PUBLISH writes
+     `src/content/<longreads|setups>/<YYYY-MM>-tg<id>.md` **verbatim** (title = his first
+     sentence, description + tags + markets from keyword lexicons; ≥150 words → long read,
+     else setup with a `type:`). Marks every pending id in `seen.json`. Borderline posts are
+     skipped on purpose — Sema hand-publishes those via `/admin`. Rules doc:
+     `scripts/PUBLISH_PLAYBOOK.md`. **Why CI, not a cloud routine:** the earlier
+     claude.ai cloud routine (`trig_01C24ejwKJ1Sa8QAPQXXsNa2`, now DISABLED) never pushed —
+     unobservable + no repo write. GitHub CI already reaches t.me (the live feed proves it)
+     and pushes via `GITHUB_TOKEN` (`permissions: contents: write`). Verified end-to-end.
 
 ## Deployment
 - **Status: LIVE (deployed 2026-07-23) → https://lopushokbot.github.io/invest-sema/**
 - Repo `lopushokbot/invest-sema` (public), Pages source = GitHub Actions.
-  `.github/workflows/deploy.yml` builds + deploys on push to main, daily at 05:00 UTC
-  (09:00 Dubai, refreshes the Telegram feed), and on manual dispatch (`gh workflow run
-  deploy.yml`). To ship changes: commit + push to main → auto-deploys in ~1–2 min.
+  `.github/workflows/deploy.yml` builds + deploys on push to main, daily at 19:00 UTC
+  (23:00 Dubai — also runs auto-publish; feed refreshes every build), and on manual
+  dispatch (`gh workflow run deploy.yml`). Auto-publish steps are gated
+  `if: github.event_name != 'push'` so they run on the cron/dispatch, not on our own
+  content commits. To ship changes: commit + push to main → auto-deploys in ~1–2 min.
 - **Posting from the live admin** (`/invest-sema/admin/`): "Sign In Using Access Token"
   with a GitHub fine-grained PAT (repo `lopushokbot/invest-sema`, Contents: Read+Write).
   Publish commits to main → auto-deploy. Sema creates the PAT once; nothing else needed.
