@@ -58,11 +58,8 @@ import { SITE, url } from '../lib/config';
       </p>
       <div class="project-grid">
         <a class="card project" href={SITE.projects.defiCourse} target="_blank" rel="noopener">
-          <span class="project-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15.5H6.5A2.5 2.5 0 0 0 4 21z" />
-              <path d="M4 18.5A2.5 2.5 0 0 1 6.5 16H20" />
-            </svg>
+          <span class="project-logo">
+            <img src={url('logos/defi-course.png')} alt="DeFi Course" />
           </span>
           <h3>DeFi Course</h3>
           <p>A free, hands-on course on earning extra yield on your crypto — start to finish.</p>
@@ -70,10 +67,8 @@ import { SITE, url } from '../lib/config';
         </a>
 
         <a class="card project" href={SITE.projects.apyDashboard} target="_blank" rel="noopener">
-          <span class="project-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />
-            </svg>
+          <span class="project-logo">
+            <img src={url('logos/dashboard.png')} alt="Stablecoin APY Dashboard" />
           </span>
           <h3>Stablecoin APY Dashboard</h3>
           <p>Live yields across the top stablecoin protocols, refreshed daily from direct APIs.</p>
@@ -81,13 +76,8 @@ import { SITE, url } from '../lib/config';
         </a>
 
         <a class="card project" href={SITE.projects.ruDashboard} target="_blank" rel="noopener">
-          <span class="project-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="3" width="7" height="9" rx="1.5" />
-              <rect x="14" y="3" width="7" height="5" rx="1.5" />
-              <rect x="14" y="12" width="7" height="9" rx="1.5" />
-              <rect x="3" y="16" width="7" height="5" rx="1.5" />
-            </svg>
+          <span class="project-logo">
+            <img src={url('logos/dashboard.png')} alt="Russian Portfolio Dashboard" />
           </span>
           <h3>Russian Portfolio Dashboard</h3>
           <p>A live dashboard tracking my Russian equity portfolio, updated automatically.</p>
@@ -95,10 +85,8 @@ import { SITE, url } from '../lib/config';
         </a>
 
         <a class="card project" href={SITE.projects.defiAlphaChat} target="_blank" rel="noopener">
-          <span class="project-icon tg">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M21.9 4.6c.3-1.3-.9-2.3-2.1-1.8L2.9 9.3c-1.3.5-1.2 2.4.1 2.8l4.3 1.3 1.6 5.2c.4 1.2 1.9 1.5 2.7.6l2.4-2.5 4.4 3.2c1 .8 2.5.2 2.8-1.1l2.7-14.2zM8.2 12.5l9.8-6.1c.4-.2.7.3.4.6l-7.7 7.2-.3 3-1.5-4.7z" />
-            </svg>
+          <span class="project-logo">
+            <img src={url('logos/telegram.png')} alt="DeFi Alpha Chat on Telegram" />
           </span>
           <h3>DeFi Alpha Chat</h3>
           <p>The community group — DeFi ideas, protocol picks and questions, in one place.</p>
@@ -163,19 +151,19 @@ import { SITE, url } from '../lib/config';
   .project:hover {
     color: inherit;
   }
-  .project-icon {
+  .project-logo {
     display: grid;
     place-items: center;
-    width: 44px;
-    height: 44px;
-    border-radius: 12px;
-    background: color-mix(in srgb, var(--accent) 12%, transparent);
-    color: var(--accent);
-    margin-bottom: 4px;
+    width: 52px;
+    height: 52px;
+    margin-bottom: 6px;
   }
-  .project-icon.tg {
-    background: color-mix(in srgb, #2aabee 16%, transparent);
-    color: #2aabee;
+  .project-logo img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
   }
   .project h3 {
     font-size: 19px;
