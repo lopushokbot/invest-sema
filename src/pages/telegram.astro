@@ -1,7 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import TelegramStrip from '../components/TelegramStrip.astro';
-import { SITE } from '../lib/config';
+import { SITE, url } from '../lib/config';
 import { fetchTelegramPosts } from '../lib/telegram';
 
 const posts = await fetchTelegramPosts(9);
@@ -14,9 +14,7 @@ const posts = await fetchTelegramPosts(9);
   <section class="page-hero">
     <div class="container tg-hero">
       <div class="tg-avatar reveal">
-        <svg width="34" height="34" viewBox="0 0 24 24" fill="#ffffff">
-          <path d="M21.9 4.6c.3-1.3-.9-2.3-2.1-1.8L2.9 9.3c-1.3.5-1.2 2.4.1 2.8l4.3 1.3 1.6 5.2c.4 1.2 1.9 1.5 2.7.6l2.4-2.5 4.4 3.2c1 .8 2.5.2 2.8-1.1l2.7-14.2zM8.2 12.5l9.8-6.1c.4-.2.7.3.4.6l-7.7 7.2-.3 3-1.5-4.7-.7 0z" />
-        </svg>
+        <img src={url('logos/telegram.png')} alt="Telegram" width="72" height="72" />
       </div>
       <h1 class="reveal">@{SITE.telegram}</h1>
       <p class="page-sub reveal">
@@ -60,8 +58,12 @@ const posts = await fetchTelegramPosts(9);
     width: 72px;
     height: 72px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #2aabee, #229ed9);
     box-shadow: 0 8px 24px rgba(42, 171, 238, 0.35);
+  }
+  .tg-avatar img {
+    width: 72px;
+    height: 72px;
+    display: block;
   }
   .tg-hero h1 {
     font-size: clamp(34px, 5vw, 52px);
