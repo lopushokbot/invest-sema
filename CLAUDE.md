@@ -98,21 +98,23 @@ invest-sema/
   investing content is published; lifestyle / travel / business-club revenue / memes /
   pure-photo posts are skipped (but still marked in seen.json). Text stays verbatim.
 - Long reads: Oct'25 #258 #260 #262, Nov'25 #266, Jan'26 #274, Feb'26 #277 #282,
-  Apr'26 #300 #301, Jul'26 #309. Setups: Dec'24 #118 #119 #126, Apr'25 #128 #184,
-  Oct'25 #253 #263 #264 #265, Nov'25 #206, Jan'26 #271 #272, Feb'26 #278 #279, Apr'26 #306.
+  Apr'26 #300 #301, Jul'26 #309, Aug'26 #328 #332. Setups: Dec'24 #118 #119 #126,
+  Apr'25 #128 #184, Oct'25 #253 #263 #264 #265, Nov'25 #206, Jan'26 #271 #272,
+  Feb'26 #278 #279, Apr'26 #306, Jul'26 #318, Aug'26 #319 #330.
 - **Sema's call overrides the word-count heuristic.** He can designate an image-heavy
   short post as a long read (e.g. #266 crypto-watchlist screenshot, #274 Trump/Greenland
   screenshot) — the picture carries the substance. When he names a post as a long read,
   move it to longreads/ verbatim regardless of length, keep its real date. His mid-July
   date references can be off — match by the described image/topic, not the stated date.
-- **Some posts are invisible to the scraper.** Telegram's public preview renders certain
-  media types as "Please open Telegram to view this post" with **no text at all** (video
-  notes, stories, paid media). Nothing can be published from those — the text simply
-  isn't on the web. `ingest.mjs` flags them (`unreadable`) and `autopublish.mjs` holds
-  them in `seen.blocked` for `RETRY_DAYS` (14) instead of silently marking them handled,
-  logging a NEEDS ATTENTION line each run. If Sema edits the post into readable text it
-  publishes itself; otherwise he sends the text and it goes in by hand. First case:
-  **#332 (2026-08-26)**, which he calls his second August long read.
+- **Some posts are invisible to the web scraper — read them in the Telegram app.**
+  Telegram's public preview renders certain messages as "Please open Telegram to view
+  this post" with **no text and no media URLs** (custom/premium emoji in the message is
+  one trigger — #332 has a custom Pepe emoji). Nothing can be published from the web for
+  those. Recovery procedure that works (used for #332, see RUNBOOK): open
+  `tg://resolve?domain=investsyoma&post=<id>` and screen-capture the desktop app.
+  `ingest.mjs` now flags these (`unreadable`) and `autopublish.mjs` holds them in
+  `seen.blocked` for `RETRY_DAYS` (14) with a NEEDS ATTENTION log line instead of
+  silently marking them handled.
 - **Display (Sema's preferred):** Long Reads page is **grouped by month** (header +
   "N long read(s)" count). Each long read is a **big box** showing its EXACT date
   (formatDate): a month with 1 → full-width box, 2 → side by side, 3 → wrap
