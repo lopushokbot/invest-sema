@@ -24,6 +24,9 @@ const SEEN = join(ROOT, 'scripts', 'seen.json');
 const CH = 'investsyoma';
 const LONGREAD_MIN_WORDS = 150;
 const PUBLISH_MIN_WORDS = 25;
+// Posts Telegram's public preview can't render are re-checked this many runs (≈days)
+// before being given up on, in case Sema edits them into readable text.
+const RETRY_DAYS = 14;
 
 // ---- lexicons (lowercase substring match on the post text) -------------------
 const FIN = [
@@ -89,6 +92,7 @@ function setupType(t) {
 function decide(post) {
   const t = post.text.toLowerCase();
   const words = post.words ?? (post.text ? post.text.split(/\s+/).filter(Boolean).length : 0);
+  if (post.unreadable) return { publish: false, reason: 'unreadable media', retry: true };
   if (!post.text || words < 1) return { publish: false, reason: 'empty / media-only' };
   if (SKIP_RE.some((re) => re.test(post.text))) return { publish: false, reason: 'service/promo/personal' };
   if (words < PUBLISH_MIN_WORDS) return { publish: false, reason: `too short (${words}w)` };
@@ -123,11 +127,11 @@ async function main() {
     console.log('No new posts.');
     return;
   }
-  const published = [], skipped = [];
+  const published = [], skipped = [], retry = [];
   for (const post of pending) {
     const d = decide(post);
     if (!d.publish) {
-      skipped.push({ id: post.id, reason: d.reason });
+      (d.retry ? retry : skipped).push({ id: post.id, reason: d.reason, link: post.link, date: post.date });
       continue;
     }
     const kind = d.longread ? 'longread' : 'setup';
@@ -139,15 +143,39 @@ async function main() {
     published.push({ id: post.id, kind, file: file.replace(ROOT + '/', '') });
   }
 
-  // Mark every pending id handled (published AND skipped) so none resurface.
+  // Mark handled (published AND skipped) so none resurface. Posts Telegram's preview
+  // can't render are held back for RETRY_DAYS so they re-surface every run — if the
+  // post is later edited into readable text it publishes itself; after that it's dropped.
   const seen = existsSync(SEEN) ? JSON.parse(await readFile(SEEN, 'utf-8')) : { processed: [] };
-  const set = new Set([...(seen.processed || []), ...pending.map((p) => p.id)]);
+  const blocked = { ...(seen.blocked || {}) };
+  const holding = new Set();
+  for (const r of retry) {
+    const rec = blocked[r.id] || { since: r.date || null, tries: 0, reason: r.reason, link: r.link };
+    rec.tries += 1;
+    rec.reason = r.reason;
+    if (rec.tries < RETRY_DAYS) {
+      blocked[r.id] = rec;
+      holding.add(r.id);
+    } else {
+      delete blocked[r.id];
+    }
+  }
+  for (const p of published) delete blocked[p.id];
+  for (const s of skipped) delete blocked[s.id];
+  const set = new Set([...(seen.processed || []), ...pending.map((p) => p.id).filter((id) => !holding.has(id))]);
   seen.processed = [...set].sort((a, b) => a - b);
+  if (Object.keys(blocked).length) seen.blocked = blocked;
+  else delete seen.blocked;
   await writeFile(SEEN, JSON.stringify(seen, null, 2) + '\n');
 
-  console.log(`Published ${published.length}, skipped ${skipped.length}.`);
+  console.log(`Published ${published.length}, skipped ${skipped.length}, needs attention ${retry.length}.`);
   for (const p of published) console.log(`  + #${p.id} → ${p.kind}  ${p.file}`);
   for (const s of skipped) console.log(`  - #${s.id} skipped (${s.reason})`);
+  for (const r of retry) {
+    console.log(`  ! #${r.id} NEEDS ATTENTION — ${r.reason}: Telegram's web preview returns`);
+    console.log(`      "Please open Telegram to view this post" and exposes no text, so there is`);
+    console.log(`      nothing to publish. Open ${r.link} in the app and hand-publish via /admin.`);
+  }
 }
 
 main().catch((e) => {

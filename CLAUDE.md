@@ -105,6 +105,14 @@ invest-sema/
   screenshot) — the picture carries the substance. When he names a post as a long read,
   move it to longreads/ verbatim regardless of length, keep its real date. His mid-July
   date references can be off — match by the described image/topic, not the stated date.
+- **Some posts are invisible to the scraper.** Telegram's public preview renders certain
+  media types as "Please open Telegram to view this post" with **no text at all** (video
+  notes, stories, paid media). Nothing can be published from those — the text simply
+  isn't on the web. `ingest.mjs` flags them (`unreadable`) and `autopublish.mjs` holds
+  them in `seen.blocked` for `RETRY_DAYS` (14) instead of silently marking them handled,
+  logging a NEEDS ATTENTION line each run. If Sema edits the post into readable text it
+  publishes itself; otherwise he sends the text and it goes in by hand. First case:
+  **#332 (2026-08-26)**, which he calls his second August long read.
 - **Display (Sema's preferred):** Long Reads page is **grouped by month** (header +
   "N long read(s)" count). Each long read is a **big box** showing its EXACT date
   (formatDate): a month with 1 → full-width box, 2 → side by side, 3 → wrap

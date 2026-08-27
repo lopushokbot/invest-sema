@@ -102,6 +102,10 @@ async function fetchPosts() {
       ...block.matchAll(/tgme_widget_message_photo_wrap[^"]*"[^>]*background-image:url\('([^']+)'\)/g),
     ].map((m) => m[1]);
     const hasVideo = /tgme_widget_message_video\b/.test(block);
+    // Telegram's public preview refuses to render some media (video notes, stories,
+    // paid media) — it emits "Please open Telegram to view this post" and NO text.
+    // Flag those so autopublish can report them instead of silently dropping them.
+    const unreadable = /message_media_not_supported/.test(block) && !textFrag;
 
     posts.push({
       id,
@@ -109,6 +113,7 @@ async function fetchPosts() {
       text: textFrag ? toText(textFrag) : '',
       photos,
       hasVideo,
+      unreadable,
       link: `https://t.me/${CHANNEL}/${id}`,
     });
   }
@@ -151,6 +156,7 @@ async function pull() {
       link: p.link,
       words: p.text ? p.text.split(/\s+/).filter(Boolean).length : 0,
       hasVideo: p.hasVideo,
+      unreadable: p.unreadable,
       photos: localPhotos,
       text: p.text,
     });
