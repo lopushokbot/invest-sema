@@ -24,6 +24,11 @@ const SEEN = join(ROOT, 'scripts', 'seen.json');
 const CH = 'investsyoma';
 const LONGREAD_MIN_WORDS = 150;
 const PUBLISH_MIN_WORDS = 25;
+// Image-heavy exception (Sema's rule): a post carried by charts/screenshots is a long
+// read even when the text is short — the picture carries the substance. #319 (69 words
+// + 4 Mag7 charts) was the case that proved it.
+const LONGREAD_PHOTO_MIN = 3;
+const LONGREAD_PHOTO_MIN_WORDS = 55;
 
 // ---- lexicons (lowercase substring match on the post text) -------------------
 const FIN = [
@@ -93,7 +98,9 @@ function decide(post) {
   if (SKIP_RE.some((re) => re.test(post.text))) return { publish: false, reason: 'service/promo/personal' };
   if (words < PUBLISH_MIN_WORDS) return { publish: false, reason: `too short (${words}w)` };
   if (!has(t, FIN)) return { publish: false, reason: 'no investing signal' };
-  return { publish: true, longread: words >= LONGREAD_MIN_WORDS };
+  const photos = (post.photos || []).length;
+  const imageHeavy = photos >= LONGREAD_PHOTO_MIN && words >= LONGREAD_PHOTO_MIN_WORDS;
+  return { publish: true, longread: words >= LONGREAD_MIN_WORDS || imageHeavy };
 }
 
 function render(post, kind) {

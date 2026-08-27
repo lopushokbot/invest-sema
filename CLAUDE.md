@@ -98,13 +98,17 @@ invest-sema/
   investing content is published; lifestyle / travel / business-club revenue / memes /
   pure-photo posts are skipped (but still marked in seen.json). Text stays verbatim.
 - Long reads: Oct'25 #258 #260 #262, Nov'25 #266, Jan'26 #274, Feb'26 #277 #282,
-  Apr'26 #300 #301, Jul'26 #309. Setups: Dec'24 #118 #119 #126, Apr'25 #128 #184,
-  Oct'25 #253 #263 #264 #265, Nov'25 #206, Jan'26 #271 #272, Feb'26 #278 #279, Apr'26 #306.
+  Apr'26 #300 #301, Jul'26 #309, Aug'26 #319 #328. Setups: Dec'24 #118 #119 #126,
+  Apr'25 #128 #184, Oct'25 #253 #263 #264 #265, Nov'25 #206, Jan'26 #271 #272,
+  Feb'26 #278 #279, Apr'26 #306, Jul'26 #318, Aug'26 #330.
 - **Sema's call overrides the word-count heuristic.** He can designate an image-heavy
   short post as a long read (e.g. #266 crypto-watchlist screenshot, #274 Trump/Greenland
   screenshot) — the picture carries the substance. When he names a post as a long read,
   move it to longreads/ verbatim regardless of length, keep its real date. His mid-July
   date references can be off — match by the described image/topic, not the stated date.
+- **Image-heavy posts are now auto-promoted** (added 2026-08-27 after #319 was misfiled
+  as a setup): `autopublish.mjs` treats ≥3 photos + ≥55 words + a finance keyword as a
+  long read, alongside the ≥150-word rule. Charts/screenshots ARE the analysis.
 - **Display (Sema's preferred):** Long Reads page is **grouped by month** (header +
   "N long read(s)" count). Each long read is a **big box** showing its EXACT date
   (formatDate): a month with 1 → full-width box, 2 → side by side, 3 → wrap
