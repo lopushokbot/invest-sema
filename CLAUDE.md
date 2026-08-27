@@ -108,9 +108,9 @@ invest-sema/
   date references can be off — match by the described image/topic, not the stated date.
 - **Some posts are invisible to the web scraper — read them in the Telegram app.**
   Telegram's public preview renders certain messages as "Please open Telegram to view
-  this post" with **no text and no media URLs** (custom/premium emoji in the message is
-  one trigger — #332 has a custom Pepe emoji). Nothing can be published from the web for
-  those. Recovery procedure that works (used for #332, see RUNBOOK): open
+  this post" with **no text and no media URLs**, even though the app shows the full post.
+  The trigger is unconfirmed (#332 has a custom Pepe emoji and was edited — either could
+  matter). Nothing can be published from the web for those. Recovery procedure that works (used for #332, see RUNBOOK): open
   `tg://resolve?domain=investsyoma&post=<id>` and screen-capture the desktop app.
   `ingest.mjs` now flags these (`unreadable`) and `autopublish.mjs` holds them in
   `seen.blocked` for `RETRY_DAYS` (14) with a NEEDS ATTENTION log line instead of
