@@ -11,6 +11,7 @@ export const SITE = {
     defiCourse: 'https://lopushokbot.github.io/defi-course/',
     apyDashboard: 'https://lopushokbot.github.io/portfolio-dashboard/apy_dashboard.html',
     ruDashboard: 'https://lopushokbot.github.io/ru-portfolio-dashboard/',
+    usDashboard: 'https://lopushokbot.github.io/us-portfolio-dashboard/',
     defiAlphaChat: 'https://t.me/defistable',
   },
 };

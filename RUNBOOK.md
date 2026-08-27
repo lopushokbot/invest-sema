@@ -157,6 +157,8 @@ Sema has reviewed the local site and said deploy.
 ---
 
 ## Changelog
+
+- **2026-08-27** — About page: added a 5th project card, "US Portfolio Valuation" → https://lopushokbot.github.io/us-portfolio-dashboard/ (`SITE.projects.usDashboard` in `src/lib/config.ts`, card in `src/pages/about.astro`, reuses `logos/dashboard.png`).
 | Date | Change |
 |------|--------|
 | 2026-08-27 | **Found why the 2nd August long read (#332, Aug 26) never reached the site.** Telegram's public preview returns *"Please open Telegram to view this post"* for it and exposes **no text and no media URLs** — the ingest scraper (which only reads `t.me/s/investsyoma`) therefore saw an empty post and autopublish skipped it as media-only, marking it handled. Verified: `/s/`, `?embed=1`, the individual post page and its OG tags all carry zero text; only the channel avatar comes back as `og:image`. Post is also flagged "edited". **Nothing can be recovered programmatically — the text has to come from Sema.** Pipeline hardened so this is never silent again: `ingest.mjs` sets `unreadable` when a post has the `message_media_not_supported` block and no text; `autopublish.mjs` holds such posts in `seen.blocked` for `RETRY_DAYS = 14` (re-checked every run instead of marked handled) and logs a loud `! #<id> NEEDS ATTENTION` line — if the post is later edited into readable text it publishes itself. #332 removed from `seen.processed` and is now in the blocked list. Also confirmed the rest of August was classified correctly (#319 Aug 3 = setup — Sema's call; #328 Aug 5 = long read; #330 = setup; #323/#329/#331 correctly skipped). |
