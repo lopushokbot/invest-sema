@@ -149,6 +149,15 @@ Sema sends a memo for a holding (docx / Telegram text / notes) — usually title
    ## Итог             (optional)
    ```
    His "+" / "-" markers map to "Плюсы" / "Минусы / риски".
+   Add `logo: logos/memos/<ticker>.svg` — see the logo step below (required: Sema
+   explicitly asked for real logos instead of generated ticker tiles).
+2b. **Logo**: fetch the official mark (Wikimedia Commons is the reliable source —
+   `https://commons.wikimedia.org/w/api.php?action=query&list=search&srnamespace=6&srsearch=<name>+logo`,
+   then `prop=imageinfo&iiprop=url` for the file URL; en.wikipedia hosts some brand
+   SVGs too). Author a 64×64 SVG in `public/logos/memos/<ticker>.svg`: coins/circles
+   as-is; wordmarks → letters on a rounded square (`rx="19"`, brand colour), like
+   `spx.svg`. Check on light + dark (`qlmanage -t -s 216 -o <dir> <file>.svg` renders a
+   PNG). Never leave the purple ticker monogram on a live memo.
 3. `npx astro build` → check `/memos/` (card in the right section, counts in the jump
    pills) and `/memos/<slug>/`.
 4. Commit + push → auto-deploy.
@@ -198,6 +207,7 @@ Sema has reviewed the local site and said deploy.
 
 ## Changelog
 
+- **2026-09-07 (later)** — Real logos on memo cards per Sema ("you have generated purple things there"). New optional `logo` frontmatter field (schema + admin image widget + `MemoCard` renders it in place of the ticker tile). Added `public/logos/memos/{btc,eth,spx}.svg`: BTC = official Wikimedia `Bitcoin.svg` (viewBox added); ETH = official `Ethereum_logo_2014.svg` polygons on the brand's light rounded square; SPX = the S, &, P paths from Commons `S&P_Global_logo.svg` in white on S&P red with the signature bar (no square S&P 500 mark exists on Commons; Google Images results were the Brandfetch tile, which this reproduces from the official vector). Verified light + dark.
 - **2026-09-07** — **Position Memos section (Sema's request).** New `memos` content collection + `MemoCard` + `/memos/` page divided into 5 fixed market sections (US, UAE, Russia, Crypto, Commodities — `MEMO_MARKETS` in config.ts) with jump pills, per-section counts and dashed empty states; `/memos/<slug>/` articles via the Article layout (eyebrow "Position Memo · <market>", status pill). Imported the 3 memos from `~/Downloads/Telegram Desktop/BTC memo.docx` verbatim (markdown structure added): BTC → Crypto, S&P 500 → US, ETH → Crypto, all `status: Holding`, dated 2026-09-07. Wired in: header nav "Memos" + footer "Position Memos", home strip "Position Memos" (latest 3, Telegram section moved to the alt background), RSS items, third Sveltia CMS section in `public/admin/config.yml`. About page: the DeFi Alpha Chat card was **replaced** by a Position Memos card (internal link, inline doc icon); `SITE.projects.defiAlphaChat` removed.
 - **2026-08-27** — About page: added a 5th project card, "US Portfolio Valuation" → https://lopushokbot.github.io/us-portfolio-dashboard/ (`SITE.projects.usDashboard` in `src/lib/config.ts`, card in `src/pages/about.astro`, reuses `logos/dashboard.png`).
 | Date | Change |

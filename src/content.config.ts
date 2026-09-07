@@ -35,6 +35,7 @@ const memos = defineCollection({
     description: z.string(),
     date: z.coerce.date(),
     market: z.enum(['US', 'UAE', 'Russia', 'Crypto', 'Commodities']),
+    logo: z.string().optional(),
     status: z.enum(['Holding', 'Watching', 'Closed']).default('Holding'),
     tags: z.array(z.string()).default([]),
     draft: z.boolean().default(false),

@@ -138,7 +138,13 @@ invest-sema/
   filter used by long reads/setups). Empty sections stay visible with a dashed
   "Nothing here yet" box; the hero has jump pills with per-market counts. Frontmatter:
   `title` (asset name), `ticker` (card monogram), `description` (one-line thesis),
-  `date`, `market` (single enum), `status` (Holding | Watching | Closed), `tags`.
+  `date`, `market` (single enum), `logo` (optional, e.g. `logos/memos/btc.svg`; card
+  falls back to a ticker monogram without it), `status` (Holding | Watching | Closed),
+  `tags`. **Sema wants real asset logos, not generated tiles** — every memo should ship
+  with one in `public/logos/memos/<ticker>.svg` (64×64 square, rounded rx 19 if it has
+  a background). Current: btc (official Wikimedia mark), eth (official diamond on the
+  brand's light square), spx (official S&P letterforms from the S&P Global SVG, white on
+  S&P red #d6002a). Source SVGs came from Wikimedia Commons.
   Article eyebrow = "Position Memo · <market>", back link jumps to that market's anchor.
   House body structure: `## Основная идея`/`## Почему покупаю` → `## Плюсы` →
   `## Минусы / риски` → `## Когда продам` → `## Итог`. Text is Sema's own (from his

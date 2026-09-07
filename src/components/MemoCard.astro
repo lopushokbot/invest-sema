@@ -1,5 +1,5 @@
 ---
-import { url, formatDate, MEMO_MARKETS } from '../lib/config';
+import { url, assetUrl, formatDate, MEMO_MARKETS } from '../lib/config';
 import type { CollectionEntry } from 'astro:content';
 
 interface Props {
@@ -21,7 +21,15 @@ const statusClass: Record<string, string> = {
 
 <a class="card memo-card reveal" href={url(`memos/${post.id}/`)}>
   <div class="memo-head">
-    <span class="memo-ticker" aria-hidden="true">{post.data.ticker}</span>
+    {
+      post.data.logo ? (
+        <span class="memo-logo" aria-hidden="true">
+          <img src={assetUrl(post.data.logo)} alt="" width="54" height="54" loading="lazy" />
+        </span>
+      ) : (
+        <span class="memo-ticker" aria-hidden="true">{post.data.ticker}</span>
+      )
+    }
     <div class="memo-titles">
       <h3 class="memo-title">{post.data.title}</h3>
       <span class="memo-kicker">{kicker}</span>
@@ -67,6 +75,16 @@ const statusClass: Record<string, string> = {
     font-weight: 600;
     font-size: 15px;
     letter-spacing: 0.02em;
+  }
+  .memo-logo {
+    flex: none;
+    width: 54px;
+    height: 54px;
+  }
+  .memo-logo img {
+    width: 54px;
+    height: 54px;
+    display: block;
   }
   .memo-titles {
     display: flex;

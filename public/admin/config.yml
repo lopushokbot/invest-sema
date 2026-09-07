@@ -215,6 +215,14 @@ collections:
           hint: "Which section of the Memos page this goes under.",
         }
       - {
+          name: logo,
+          label: "Logo",
+          widget: image,
+          required: false,
+          choose_url: false,
+          hint: "Square asset logo (SVG/PNG, 64×64 or larger). Built-in ones live in public/logos/memos/ — e.g. logos/memos/btc.svg. Leave empty to show the ticker instead.",
+        }
+      - {
           name: status,
           label: "Status",
           widget: select,
