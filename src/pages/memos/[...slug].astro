@@ -1,0 +1,28 @@
+---
+import Article from '../../layouts/Article.astro';
+import { getCollection, render } from 'astro:content';
+import { url, MEMO_MARKETS } from '../../lib/config';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('memos', ({ data }) => !data.draft);
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+const market = MEMO_MARKETS.find((m) => m.id === post.data.market);
+---
+
+<Article
+  title={`${post.data.title} memo`}
+  description={post.data.description}
+  date={post.data.date}
+  tags={[post.data.ticker, ...post.data.tags]}
+  type={post.data.status}
+  eyebrow={`Position Memo · ${market?.label ?? post.data.market}`}
+  body={post.body}
+  backHref={url(`memos/#${post.data.market.toLowerCase()}`)}
+  backLabel="Position Memos"
+>
+  <Content />
+</Article>

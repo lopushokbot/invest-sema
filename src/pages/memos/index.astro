@@ -1,0 +1,179 @@
+---
+import Base from '../../layouts/Base.astro';
+import MemoCard from '../../components/MemoCard.astro';
+import { getCollection } from 'astro:content';
+import { MEMO_MARKETS } from '../../lib/config';
+
+const posts = (await getCollection('memos', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.date.getTime() - a.data.date.getTime()
+);
+
+const sections = MEMO_MARKETS.map((m) => ({
+  ...m,
+  anchor: m.id.toLowerCase(),
+  posts: posts.filter((p) => p.data.market === m.id),
+}));
+---
+
+<Base
+  title="Position Memos"
+  description="Why I hold what I hold. One memo per position — the thesis, the pluses, the risks and what would make me sell — across the US, UAE, Russian, crypto and commodities markets."
+>
+  <section class="page-hero">
+    <div class="container">
+      <p class="eyebrow reveal">Positions · Five markets</p>
+      <h1 class="reveal">Position Memos</h1>
+      <p class="page-sub reveal">
+        Why I hold what I hold. One memo per position: the thesis, the pluses, the risks,
+        and what would make me sell.
+      </p>
+      <nav class="jump-row reveal" aria-label="Markets">
+        {
+          sections.map((s) => (
+            <a class={`jump ${s.posts.length ? '' : 'is-empty'}`} href={`#${s.anchor}`}>
+              {s.label}
+              <span class="jump-count">{s.posts.length}</span>
+            </a>
+          ))
+        }
+      </nav>
+    </div>
+  </section>
+
+  <section class="container list-wrap">
+    {
+      sections.map((s) => (
+        <div class="market-group" id={s.anchor}>
+          <div class="market-head reveal">
+            <div>
+              <h2 class="market-label">{s.label}</h2>
+              <p class="market-blurb">{s.blurb}</p>
+            </div>
+            <span class="market-count">
+              {s.posts.length
+                ? `${s.posts.length} ${s.posts.length === 1 ? 'memo' : 'memos'}`
+                : 'No memos yet'}
+            </span>
+          </div>
+          {s.posts.length ? (
+            <div class="memo-grid">
+              {s.posts.map((post) => (
+                <MemoCard post={post} />
+              ))}
+            </div>
+          ) : (
+            <div class="memo-empty reveal">
+              <span>Nothing here yet.</span>
+            </div>
+          )}
+        </div>
+      ))
+    }
+  </section>
+</Base>
+
+<style>
+  .page-hero {
+    padding: 88px 0 40px;
+  }
+  .page-hero h1 {
+    font-size: clamp(40px, 6vw, 64px);
+    margin: 12px 0 16px;
+  }
+  .page-sub {
+    font-size: 19px;
+    color: var(--text-secondary);
+    max-width: 56ch;
+    line-height: 1.55;
+  }
+  .jump-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 32px;
+  }
+  .jump {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px 8px 18px;
+    border-radius: 980px;
+    border: 1px solid var(--border-strong);
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.25s ease;
+  }
+  .jump:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .jump-count {
+    display: inline-grid;
+    place-items: center;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 6px;
+    border-radius: 980px;
+    background: var(--text);
+    color: var(--bg);
+    font-size: 11.5px;
+    font-weight: 650;
+    font-variant-numeric: tabular-nums;
+  }
+  .jump.is-empty .jump-count {
+    background: var(--bg-subtle);
+    color: var(--text-muted);
+  }
+  .list-wrap {
+    padding-bottom: 40px;
+  }
+  .market-group {
+    margin-bottom: 64px;
+    scroll-margin-top: 96px;
+  }
+  .market-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 22px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .market-label {
+    font-size: clamp(24px, 3vw, 32px);
+  }
+  .market-blurb {
+    margin-top: 6px;
+    font-size: 15px;
+    color: var(--text-secondary);
+    max-width: 52ch;
+  }
+  .market-count {
+    flex: none;
+    font-size: 13.5px;
+    color: var(--text-muted);
+    padding-bottom: 6px;
+  }
+  .memo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+  }
+  .memo-empty {
+    padding: 34px 28px;
+    border: 1px dashed var(--border-strong);
+    border-radius: var(--radius);
+    color: var(--text-muted);
+    font-size: 15px;
+    text-align: center;
+  }
+  @media (max-width: 640px) {
+    .market-head {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
+    }
+  }
+</style>

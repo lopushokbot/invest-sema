@@ -1,0 +1,142 @@
+---
+import { url, formatDate, MEMO_MARKETS } from '../lib/config';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  post: CollectionEntry<'memos'>;
+  showMarket?: boolean;
+}
+const { post, showMarket = false } = Astro.props;
+const market = MEMO_MARKETS.find((m) => m.id === post.data.market);
+// Under the title: the market when shown outside its section (home), else the tags.
+const kicker = showMarket
+  ? market?.label ?? post.data.market
+  : post.data.tags[0] || market?.label || post.data.market;
+const statusClass: Record<string, string> = {
+  Holding: 'st-holding',
+  Watching: 'st-watching',
+  Closed: 'st-closed',
+};
+---
+
+<a class="card memo-card reveal" href={url(`memos/${post.id}/`)}>
+  <div class="memo-head">
+    <span class="memo-ticker" aria-hidden="true">{post.data.ticker}</span>
+    <div class="memo-titles">
+      <h3 class="memo-title">{post.data.title}</h3>
+      <span class="memo-kicker">{kicker}</span>
+    </div>
+    <span class={`memo-status ${statusClass[post.data.status] ?? ''}`}>
+      <i></i>{post.data.status}
+    </span>
+  </div>
+  <p class="memo-desc">{post.data.description}</p>
+  <div class="memo-foot">
+    <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time>
+    <span class="memo-more">Read memo →</span>
+  </div>
+</a>
+
+<style>
+  .memo-card {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 26px;
+    color: inherit;
+  }
+  .memo-card:hover {
+    color: inherit;
+  }
+  .memo-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .memo-ticker {
+    flex: none;
+    display: grid;
+    place-items: center;
+    min-width: 54px;
+    height: 54px;
+    padding: 0 10px;
+    border-radius: 16px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-family: var(--font-serif);
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: 0.02em;
+  }
+  .memo-titles {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+    flex: 1;
+  }
+  .memo-title {
+    font-size: 21px;
+    line-height: 1.2;
+  }
+  .memo-kicker {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .memo-status {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11.5px;
+    font-weight: 650;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .memo-status i {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+  .st-holding {
+    color: var(--green-ink);
+  }
+  .st-watching {
+    color: var(--accent);
+  }
+  .memo-desc {
+    font-size: 14.5px;
+    line-height: 1.55;
+    color: var(--text-secondary);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    flex: 1;
+  }
+  .memo-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  .memo-more {
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--accent);
+  }
+  @media (max-width: 420px) {
+    .memo-status {
+      display: none;
+    }
+  }
+</style>

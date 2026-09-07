@@ -27,4 +27,18 @@ const setups = defineCollection({
   }),
 });
 
-export const collections = { longreads, setups };
+const memos = defineCollection({
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/memos' }),
+  schema: z.object({
+    title: z.string(),
+    ticker: z.string(),
+    description: z.string(),
+    date: z.coerce.date(),
+    market: z.enum(['US', 'UAE', 'Russia', 'Crypto', 'Commodities']),
+    status: z.enum(['Holding', 'Watching', 'Closed']).default('Holding'),
+    tags: z.array(z.string()).default([]),
+    draft: z.boolean().default(false),
+  }),
+});
+
+export const collections = { longreads, setups, memos };

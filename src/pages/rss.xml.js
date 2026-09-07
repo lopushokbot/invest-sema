@@ -5,6 +5,7 @@ import { SITE } from '../lib/config';
 export async function GET(context) {
   const longreads = await getCollection('longreads', ({ data }) => !data.draft);
   const setups = await getCollection('setups', ({ data }) => !data.draft);
+  const memos = await getCollection('memos', ({ data }) => !data.draft);
 
   const items = [
     ...longreads.map((p) => ({
@@ -20,6 +21,13 @@ export async function GET(context) {
       pubDate: p.data.date,
       link: `/invest-sema/setups/${p.id}/`,
       categories: [p.data.type, ...p.data.tags],
+    })),
+    ...memos.map((p) => ({
+      title: `${p.data.title} memo`,
+      description: p.data.description,
+      pubDate: p.data.date,
+      link: `/invest-sema/memos/${p.id}/`,
+      categories: ['Position Memo', p.data.market, ...p.data.tags],
     })),
   ].sort((a, b) => b.pubDate.getTime() - a.pubDate.getTime());
 

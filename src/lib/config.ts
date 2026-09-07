@@ -12,7 +12,6 @@ export const SITE = {
     apyDashboard: 'https://lopushokbot.github.io/portfolio-dashboard/apy_dashboard.html',
     ruDashboard: 'https://lopushokbot.github.io/ru-portfolio-dashboard/',
     usDashboard: 'https://lopushokbot.github.io/us-portfolio-dashboard/',
-    defiAlphaChat: 'https://t.me/defistable',
   },
 };
 
@@ -31,6 +30,18 @@ export const MARKETS = [
 ] as const;
 
 export type MarketId = (typeof MARKETS)[number]['id'];
+
+/** The five markets the Position Memos page is divided into (order = page order). */
+export const MEMO_MARKETS = [
+  { id: 'US', label: 'US market', blurb: 'US equities, indices and the companies behind them.' },
+  { id: 'UAE', label: 'UAE market', blurb: 'Dubai and Abu Dhabi listings, real estate and local ventures.' },
+  { id: 'Russia', label: 'Russian market', blurb: 'Russian equities, bonds and rouble positions.' },
+  { id: 'Crypto', label: 'Crypto market', blurb: 'Coins, tokens and on-chain yield.' },
+  { id: 'Commodities', label: 'Commodities market', blurb: 'Gold, energy and other real assets.' },
+] as const;
+
+export type MemoMarketId = (typeof MEMO_MARKETS)[number]['id'];
+export const MEMO_STATUSES = ['Holding', 'Watching', 'Closed'] as const;
 
 /** Resolve a content-provided asset path: absolute/URL as-is, else add the base. */
 export function assetUrl(path: string): string {

@@ -2,6 +2,7 @@
 import Base from '../layouts/Base.astro';
 import LongReadCard from '../components/LongReadCard.astro';
 import SetupCard from '../components/SetupCard.astro';
+import MemoCard from '../components/MemoCard.astro';
 import TelegramStrip from '../components/TelegramStrip.astro';
 import { getCollection } from 'astro:content';
 import { SITE, url, formatMonth } from '../lib/config';
@@ -13,6 +14,9 @@ const longreads = (await getCollection('longreads', ({ data }) => !data.draft)).
 const setups = (await getCollection('setups', ({ data }) => !data.draft)).sort(
   (a, b) => b.data.date.getTime() - a.data.date.getTime()
 );
+const memos = (await getCollection('memos', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.date.getTime() - a.data.date.getTime()
+);
 const tgPosts = await fetchTelegramPosts(3);
 
 // The latest month with long reads — its 1–2 pieces headline the front page
@@ -21,6 +25,7 @@ const monthPosts = latestMonth
   ? longreads.filter((p) => formatMonth(p.data.date) === latestMonth)
   : [];
 const latestSetups = setups.slice(0, 3);
+const latestMemos = memos.slice(0, 3);
 ---
 
 <Base>
@@ -74,8 +79,30 @@ const latestSetups = setups.slice(0, 3);
     </div>
   </section>
 
+  <!-- Position memos -->
+  {
+    latestMemos.length > 0 && (
+      <section class="section">
+        <div class="container">
+          <div class="section-head reveal">
+            <div>
+              <p class="month-tag">Why I hold what I hold</p>
+              <h2>Position Memos</h2>
+            </div>
+            <a class="see-all" href={url('memos/')}>All memos →</a>
+          </div>
+          <div class="setup-grid">
+            {latestMemos.map((post) => (
+              <MemoCard post={post} showMarket />
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
   <!-- Telegram -->
-  <section class="section">
+  <section class="section alt">
     <div class="container">
       <div class="section-head reveal">
         <h2>From Telegram</h2>

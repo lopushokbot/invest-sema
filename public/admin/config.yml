@@ -1,5 +1,5 @@
 # Invest Sema — admin (Sveltia CMS)
-# Two sections: Long Reads and Weekly Setups. Publish = commit to GitHub = auto-deploy.
+# Three sections: Long Reads, Weekly Setups and Position Memos. Publish = commit to GitHub = auto-deploy.
 
 backend:
   name: github
@@ -166,3 +166,79 @@ collections:
           required: false,
         }
       - { name: body, label: "Post", widget: markdown }
+
+  # --------------------------------------------------------------- POSITION MEMOS
+  - name: memos
+    label: "Position Memos"
+    label_singular: "Memo"
+    description: "One memo per position — thesis, pluses, risks, sell triggers. Grouped by market on the site."
+    folder: "src/content/memos"
+    create: true
+    delete: true
+    slug: "{{year}}-{{month}}-{{ticker}}"
+    extension: md
+    format: frontmatter
+    summary: "{{fields.market}} — {{title}} ({{ticker}})"
+    sortable_fields: [date, title, market]
+    view_filters:
+      - { label: "Published", field: draft, pattern: false }
+      - { label: "Drafts", field: draft, pattern: true }
+    fields:
+      - { name: title, label: "Asset", widget: string, hint: "e.g. Bitcoin, S&P 500, Ethereum" }
+      - { name: ticker, label: "Ticker", widget: string, hint: "Short code shown on the card, e.g. BTC, SPX, ETH" }
+      - {
+          name: description,
+          label: "One-line thesis",
+          hint: "1–2 sentences shown on the memo card.",
+          widget: text,
+        }
+      - {
+          name: date,
+          label: "Date",
+          widget: datetime,
+          date_format: "YYYY-MM-DD",
+          time_format: false,
+          format: "YYYY-MM-DD",
+        }
+      - {
+          name: market,
+          label: "Market",
+          widget: select,
+          options:
+            [
+              { label: "US market", value: "US" },
+              { label: "UAE market", value: "UAE" },
+              { label: "Russian market", value: "Russia" },
+              { label: "Crypto market", value: "Crypto" },
+              { label: "Commodities market", value: "Commodities" },
+            ],
+          hint: "Which section of the Memos page this goes under.",
+        }
+      - {
+          name: status,
+          label: "Status",
+          widget: select,
+          options: ["Holding", "Watching", "Closed"],
+          default: "Holding",
+        }
+      - {
+          name: tags,
+          label: "Tags",
+          widget: list,
+          required: false,
+          default: [],
+          hint: "Optional free-form labels, e.g. Equities, DeFi.",
+        }
+      - {
+          name: draft,
+          label: "Draft (hide from the site)",
+          widget: boolean,
+          default: false,
+          required: false,
+        }
+      - {
+          name: body,
+          label: "Memo",
+          widget: markdown,
+          hint: "House structure: ## Основная идея / Почему покупаю · ## Плюсы · ## Минусы / риски · ## Когда продам · ## Итог",
+        }

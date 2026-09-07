@@ -11,6 +11,7 @@
 | **Admin panel (Sema self-serve)** | Double-click `Invest Sema Admin.command`, or live `/invest-sema/admin/` — see task below |
 | Publish a long read | Admin → Long Reads → New, OR add file to `src/content/longreads/`, build, push |
 | Publish a setup | Admin → Weekly Setups → New, OR add file to `src/content/setups/`, build, push |
+| Publish a position memo | Admin → Position Memos → New, OR add file to `src/content/memos/`, build, push — see task below |
 | Refresh Telegram feed | Any rebuild/deploy does it (daily action also does it) |
 | **Auto-publish new TG posts** | Automatic — GitHub Actions daily 23:00 Dubai (`ingest.mjs`+`autopublish.mjs`). See task below |
 
@@ -120,6 +121,45 @@ always include a "what proves it wrong" line — that's the house style.
 
 ---
 
+## Task: Publish a new position memo
+
+### When to run
+Sema sends a memo for a holding (docx / Telegram text / notes) — usually titled
+"<TICKER> memo". One file per asset. A docx can bundle several memos (the first one,
+"BTC memo.docx", held BTC + S&P 500 + ETH) — split it into one file each.
+
+### Steps
+1. Read the source: `textutil -convert txt -stdout "<file>.docx"`. Keep his text
+   verbatim; only add markdown structure.
+2. Create `src/content/memos/<YYYY-MM>-<ticker>.md`:
+   ```
+   ---
+   title: "Bitcoin"            # asset name
+   ticker: "BTC"               # short code shown on the card
+   description: "One-line thesis shown on the card."
+   date: 2026-09-07
+   market: Crypto              # US | UAE | Russia | Crypto | Commodities → page section
+   status: Holding             # Holding | Watching | Closed
+   tags: [Crypto, Store of value]
+   ---
+   ## Основная идея (or ## Почему покупаю)
+   ## Плюсы            (bullets: **Title.** text)
+   ## Минусы / риски
+   ## Когда продам     (numbered or bullets)
+   ## Итог             (optional)
+   ```
+   His "+" / "-" markers map to "Плюсы" / "Минусы / риски".
+3. `npx astro build` → check `/memos/` (card in the right section, counts in the jump
+   pills) and `/memos/<slug>/`.
+4. Commit + push → auto-deploy.
+
+### Validation
+- [ ] Memo appears under the right market section and in the home "Position Memos" strip
+- [ ] Status dot colour: Holding green, Watching purple, Closed grey
+- [ ] Dark mode fine; article back link returns to the market anchor
+
+---
+
 ## Task: First deploy (pending Sema's OK)
 
 ### Prerequisites
@@ -158,6 +198,7 @@ Sema has reviewed the local site and said deploy.
 
 ## Changelog
 
+- **2026-09-07** — **Position Memos section (Sema's request).** New `memos` content collection + `MemoCard` + `/memos/` page divided into 5 fixed market sections (US, UAE, Russia, Crypto, Commodities — `MEMO_MARKETS` in config.ts) with jump pills, per-section counts and dashed empty states; `/memos/<slug>/` articles via the Article layout (eyebrow "Position Memo · <market>", status pill). Imported the 3 memos from `~/Downloads/Telegram Desktop/BTC memo.docx` verbatim (markdown structure added): BTC → Crypto, S&P 500 → US, ETH → Crypto, all `status: Holding`, dated 2026-09-07. Wired in: header nav "Memos" + footer "Position Memos", home strip "Position Memos" (latest 3, Telegram section moved to the alt background), RSS items, third Sveltia CMS section in `public/admin/config.yml`. About page: the DeFi Alpha Chat card was **replaced** by a Position Memos card (internal link, inline doc icon); `SITE.projects.defiAlphaChat` removed.
 - **2026-08-27** — About page: added a 5th project card, "US Portfolio Valuation" → https://lopushokbot.github.io/us-portfolio-dashboard/ (`SITE.projects.usDashboard` in `src/lib/config.ts`, card in `src/pages/about.astro`, reuses `logos/dashboard.png`).
 | Date | Change |
 |------|--------|

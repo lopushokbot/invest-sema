@@ -53,8 +53,8 @@ import { SITE, url } from '../lib/config';
     <div class="projects reveal">
       <h2 class="projects-title">My small investment-related projects</h2>
       <p class="projects-sub">
-        Where I go deeper — a free DeFi course, live rates and portfolio dashboards, and a
-        community chat.
+        Where I go deeper — a free DeFi course, live rates and portfolio dashboards, and the
+        memos behind my positions.
       </p>
       <div class="project-grid">
         <a class="card project" href={SITE.projects.defiCourse} target="_blank" rel="noopener">
@@ -93,13 +93,17 @@ import { SITE, url } from '../lib/config';
           <span class="project-link">View the dashboard →</span>
         </a>
 
-        <a class="card project" href={SITE.projects.defiAlphaChat} target="_blank" rel="noopener">
-          <span class="project-logo">
-            <img src={url('logos/telegram.png')} alt="DeFi Alpha Chat on Telegram" />
+        <a class="card project" href={url('memos/')}>
+          <span class="project-logo project-logo-memo" aria-hidden="true">
+            <svg width="40" height="40" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M11 5.5h12.5L30 12v20.5a2 2 0 0 1-2 2H11a2 2 0 0 1-2-2v-25a2 2 0 0 1 2-2z" />
+              <path d="M23 5.5V12h7" />
+              <path d="M14 20h11M14 25.5h11M14 31h7" />
+            </svg>
           </span>
-          <h3>DeFi Alpha Chat</h3>
-          <p>The community group — DeFi ideas, protocol picks and questions, in one place.</p>
-          <span class="project-link">Join the chat →</span>
+          <h3>Position Memos</h3>
+          <p>Why I hold what I hold — the thesis, the risks and the sell triggers for every position, by market.</p>
+          <span class="project-link">Read the memos →</span>
         </a>
       </div>
     </div>
@@ -166,6 +170,11 @@ import { SITE, url } from '../lib/config';
     width: 52px;
     height: 52px;
     margin-bottom: 6px;
+  }
+  .project-logo-memo {
+    color: var(--accent);
+    background: var(--accent-soft);
+    border-radius: 14px;
   }
   .project-logo img {
     max-width: 100%;

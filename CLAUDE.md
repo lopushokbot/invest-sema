@@ -1,7 +1,8 @@
 # Invest Sema
 
 ## Overview
-Sema's public investing publication: monthly long reads, weekly setups/ideas, and a live
+Sema's public investing publication: monthly long reads, weekly setups/ideas, position
+memos (one per holding, grouped by market), and a live
 feed from his Telegram channel (@investsyoma). Free for readers. Apple-inspired design
 (New York headings, Inter body, light + true-black dark mode). Built so paid tiers /
 member login can be added later without a rewrite.
@@ -27,13 +28,14 @@ invest-sema/
 ├── src/
 │   ├── lib/config.ts       — SITE constants (name, telegram channel), url() base helper
 │   ├── lib/telegram.ts     — build-time scrape of t.me/s/investsyoma (fails soft → CTA card)
-│   ├── content.config.ts   — collections: longreads, setups (zod schemas)
+│   ├── content.config.ts   — collections: longreads, setups, memos (zod schemas)
 │   ├── content/longreads/  — monthly pieces (.md or .mdx)
 │   ├── content/setups/     — weekly pieces (.md)
+│   ├── content/memos/      — position memos (.md), one per holding, `market:` = section
 │   ├── layouts/Base.astro  — head/SEO/OG, header, footer, theme + reveal scripts
 │   ├── layouts/Article.astro — article shell (hero, cover, prose, share footer)
-│   ├── components/         — Chart, Gallery, LongReadCard, SetupCard, TelegramStrip
-│   └── pages/              — index, longreads/, setups/, telegram, about, 404, rss.xml
+│   ├── components/         — Chart, Gallery, LongReadCard, SetupCard, MemoCard, TelegramStrip
+│   └── pages/              — index, longreads/, setups/, memos/, telegram, about, 404, rss.xml
 ├── scripts/
 │   ├── ingest.mjs          — Telegram → site ingestion (pull|mark|list), no creds
 │   ├── seen.json           — committed state: ids already handled (published or skipped)
@@ -129,13 +131,28 @@ invest-sema/
 - **Logo:** `public/logo.png` (transparent, Sema's arrow/candles mark) in header +
   footer + favicon + OG card. If replacing, drop a new mark and re-run the bg-removal
   (see RUNBOOK v5 changelog) to keep it transparent for dark mode.
+- **Position Memos (added 2026-09-07, Sema's request):** `/memos/` — one memo per
+  holding explaining why he holds it (thesis, pluses, risks, sell triggers). The page is
+  divided into **five fixed market sections in this order: US, UAE, Russia, Crypto,
+  Commodities** (`MEMO_MARKETS` in config.ts — separate from the 3-market `MARKETS`
+  filter used by long reads/setups). Empty sections stay visible with a dashed
+  "Nothing here yet" box; the hero has jump pills with per-market counts. Frontmatter:
+  `title` (asset name), `ticker` (card monogram), `description` (one-line thesis),
+  `date`, `market` (single enum), `status` (Holding | Watching | Closed), `tags`.
+  Article eyebrow = "Position Memo · <market>", back link jumps to that market's anchor.
+  House body structure: `## Основная идея`/`## Почему покупаю` → `## Плюсы` →
+  `## Минусы / риски` → `## Когда продам` → `## Итог`. Text is Sema's own (from his
+  "BTC memo.docx"), kept verbatim apart from markdown structure. Current memos: BTC +
+  ETH (Crypto), S&P 500 (US). Home has a "Position Memos" strip (latest 3); Memos is in
+  the header nav + footer; memos are in the RSS feed and the admin (third CMS section).
 - About page: Sema's own copy (title "(Hopefully) Useful thoughts about markets", intro,
-  "How I think", "The fine print"). "My small investment-related projects" section has 4
-  cards — DeFi Course, Stablecoin APY Dashboard, Russian Portfolio Dashboard, DeFi Alpha
-  Chat — links in `SITE.projects` (config.ts). About is in the nav.
+  "How I think", "The fine print"). "My small investment-related projects" section has 5
+  cards — DeFi Course, Stablecoin APY Dashboard, Russian Portfolio Dashboard, US
+  Portfolio Valuation, Position Memos (internal link; replaced the DeFi Alpha Chat card
+  on 2026-09-07 per Sema — `defiAlphaChat` removed from `SITE.projects`). About is in the nav.
 - Setups page is **month-grouped** (header + count), same as Long Reads.
-- **Admin panel (Sema self-serve): Sveltia CMS at `public/admin/`** — two sections
-  (Long Reads, Weekly Setups). Local editing via `Invest Sema Admin.command` ("Work with
+- **Admin panel (Sema self-serve): Sveltia CMS at `public/admin/`** — three sections
+  (Long Reads, Weekly Setups, Position Memos). Local editing via `Invest Sema Admin.command` ("Work with
   Local Repository", Chrome FS Access, no login); hosted editing via GitHub PAT after
   deploy ("Sign In Using Access Token"), publish = commit = auto-deploy. No OAuth
   worker. `assetUrl()` resolves CMS-uploaded image paths. See RUNBOOK "Admin panel".
