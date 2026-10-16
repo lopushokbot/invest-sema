@@ -92,5 +92,13 @@
     332,
     333,
     334
-  ]
+  ],
+  "blocked": {
+    "335": {
+      "since": "2026-10-16",
+      "tries": 1,
+      "reason": "unreadable media",
+      "link": "https://t.me/investsyoma/335"
+    }
+  }
 }
