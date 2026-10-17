@@ -91,12 +91,13 @@
     331,
     332,
     333,
-    334
+    334,
+    336
   ],
   "blocked": {
     "335": {
       "since": "2026-10-16",
-      "tries": 1,
+      "tries": 2,
       "reason": "unreadable media",
       "link": "https://t.me/investsyoma/335"
     }
