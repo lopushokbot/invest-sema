@@ -32,9 +32,8 @@ Nothing to run by hand. It's deterministic (no LLM) so it always behaves the sam
   tags, markets from keyword lexicons; **≥150 words → long read**, else **setup** (with a
   `type:`). Body is byte-for-byte his; photos + Telegram footer link appended.
 - Borderline posts are skipped on purpose → Sema hand-publishes via `/admin` if he wants.
-- **≥150-word posts always publish as long reads**, even with no finance keyword (the Oct 2026
-  NYC essay #336 was wrongly skipped as "no investing signal" before this rule). Non-finance
-  posts get the `Life` tag. The finance filter only gates short posts.
+- **Lifestyle posts are skipped on purpose, even long ones** — Sema confirmed (2026-10-20) the
+  NYC essay #336 does NOT belong on the site. Only market/economy posts become long reads.
 - **Media**: photos → `public/images/tg/<id>[-n].jpg` (2+ photos render as a 2-column grid);
   short videos → `<id>-v<n>.mp4` + poster `.jpg`, embedded as `<video>` (clips >25 MB stay on
   Telegram). Post text is cut at the text div's own closing tag (`innerDiv`) so reaction

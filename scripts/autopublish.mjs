@@ -96,9 +96,6 @@ function decide(post) {
   if (!post.text || words < 1) return { publish: false, reason: 'empty / media-only' };
   if (SKIP_RE.some((re) => re.test(post.text))) return { publish: false, reason: 'service/promo/personal' };
   if (words < PUBLISH_MIN_WORDS) return { publish: false, reason: `too short (${words}w)` };
-  // A long-read-length post is a deliberate essay — publish it even when it isn't about
-  // markets (e.g. the Oct 2026 NYC piece). The finance filter only gates short posts.
-  if (words >= LONGREAD_MIN_WORDS) return { publish: true, longread: true };
   if (!has(t, FIN)) return { publish: false, reason: 'no investing signal' };
   return { publish: true, longread: words >= LONGREAD_MIN_WORDS };
 }
@@ -109,7 +106,7 @@ function render(post, kind) {
   const desc = description(t, 170);
   let markets = pickList(t.toLowerCase(), MARKET_KW);
   let tags = pickList(t.toLowerCase(), TAG_KW);
-  if (!tags.length) tags = markets.includes('Crypto') ? ['Crypto'] : has(t.toLowerCase(), FIN) ? ['Macro'] : ['Life'];
+  if (!tags.length) tags = markets.includes('Crypto') ? ['Crypto'] : ['Macro'];
   const fm = ['---', `title: "${yaml(title)}"`, `description: "${yaml(desc)}"`, `date: ${post.date}`];
   if (kind === 'setup') fm.push(`type: "${setupType(t.toLowerCase())}"`);
   fm.push(`tags: [${tags.join(', ')}]`);

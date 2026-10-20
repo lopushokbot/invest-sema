@@ -21,14 +21,17 @@ const posts = await fetchTelegramPosts(9);
         The daily stream: what I'm watching, quick market reactions, and the life around
         investing. Long reads and setups get announced here first.
       </p>
-      <a
-        class="btn btn-primary reveal"
-        href={SITE.telegramUrl}
-        target="_blank"
-        rel="noopener"
-      >
-        Subscribe on Telegram
-      </a>
+      <div class="tg-cta reveal">
+        <a class="btn btn-primary" href={SITE.telegramUrl} target="_blank" rel="noopener">
+          Subscribe on Telegram
+        </a>
+        <a class="btn btn-ghost" href={SITE.xUrl} target="_blank" rel="noopener">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path>
+          </svg>
+          Follow @{SITE.x} on X
+        </a>
+      </div>
     </div>
   </section>
 
@@ -42,6 +45,12 @@ const posts = await fetchTelegramPosts(9);
 </Base>
 
 <style>
+  .tg-cta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+  }
   .page-hero {
     padding: 88px 0 48px;
   }
