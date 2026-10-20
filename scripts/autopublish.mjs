@@ -96,6 +96,9 @@ function decide(post) {
   if (!post.text || words < 1) return { publish: false, reason: 'empty / media-only' };
   if (SKIP_RE.some((re) => re.test(post.text))) return { publish: false, reason: 'service/promo/personal' };
   if (words < PUBLISH_MIN_WORDS) return { publish: false, reason: `too short (${words}w)` };
+  // A long-read-length post is a deliberate essay — publish it even when it isn't about
+  // markets (e.g. the Oct 2026 NYC piece). The finance filter only gates short posts.
+  if (words >= LONGREAD_MIN_WORDS) return { publish: true, longread: true };
   if (!has(t, FIN)) return { publish: false, reason: 'no investing signal' };
   return { publish: true, longread: words >= LONGREAD_MIN_WORDS };
 }
@@ -106,15 +109,21 @@ function render(post, kind) {
   const desc = description(t, 170);
   let markets = pickList(t.toLowerCase(), MARKET_KW);
   let tags = pickList(t.toLowerCase(), TAG_KW);
-  if (!tags.length) tags = markets.includes('Crypto') ? ['Crypto'] : ['Macro'];
+  if (!tags.length) tags = markets.includes('Crypto') ? ['Crypto'] : has(t.toLowerCase(), FIN) ? ['Macro'] : ['Life'];
   const fm = ['---', `title: "${yaml(title)}"`, `description: "${yaml(desc)}"`, `date: ${post.date}`];
   if (kind === 'setup') fm.push(`type: "${setupType(t.toLowerCase())}"`);
   fm.push(`tags: [${tags.join(', ')}]`);
   fm.push(`markets: [${markets.join(', ')}]`);
   fm.push('---', '');
-  const photos = (post.photos || []).map((p, i) => `\n![${yaml(firstSentence(t, 60)) || 'Иллюстрация'}](${p})`).join('');
+  // Blank line first so photos form their own paragraph (styled as a grid when 2+).
+  const photos = (post.photos || []).length
+    ? '\n\n' + post.photos.map((p) => `![${yaml(firstSentence(t, 60)) || 'Иллюстрация'}](${p})`).join('\n')
+    : '';
+  const videos = (post.videos || [])
+    .map((v) => `\n\n<video src="${v.src}"${v.poster ? ` poster="${v.poster}"` : ''} controls playsinline preload="metadata"></video>`)
+    .join('');
   const footer = `\n\n---\n\n*[Оригинал поста в Telegram →](${post.link || `https://t.me/${CH}/${post.id}`})*\n`;
-  return fm.join('\n') + t.trim() + photos + footer;
+  return fm.join('\n') + t.trim() + photos + videos + footer;
 }
 
 async function main() {

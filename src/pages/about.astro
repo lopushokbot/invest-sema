@@ -24,7 +24,8 @@ import { SITE, url } from '../lib/config';
         This website is for me. Here I get to express my thoughts and ideas on the markets.
         On my <a href={SITE.telegramUrl} target="_blank" rel="noopener">Telegram channel</a> I
         also post lifestyle content — in some ways connected to my work — and other thoughts
-        I want to share.
+        I want to share. You can also find me on
+        <a href={SITE.xUrl} target="_blank" rel="noopener">X&nbsp;(@{SITE.x})</a>.
       </p>
       <p>
         The content of Invest Sema is simple: <strong>one or two long reads a month</strong>
@@ -111,6 +112,12 @@ import { SITE, url } from '../lib/config';
     <div class="about-cta reveal">
       <a class="btn btn-primary" href={SITE.telegramUrl} target="_blank" rel="noopener">
         Follow on Telegram
+      </a>
+      <a class="btn btn-ghost" href={SITE.xUrl} target="_blank" rel="noopener">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path>
+        </svg>
+        Follow on X
       </a>
       <a class="btn btn-ghost" href={url('longreads/')}>Start with a long read</a>
     </div>

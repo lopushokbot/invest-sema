@@ -6,6 +6,8 @@ export const SITE = {
   author: 'Sema',
   telegram: 'investsyoma',
   telegramUrl: 'https://t.me/investsyoma',
+  x: '_s1mooon_',
+  xUrl: 'https://x.com/_s1mooon_',
   url: 'https://lopushokbot.github.io/invest-sema/',
   projects: {
     defiCourse: 'https://lopushokbot.github.io/defi-course/',

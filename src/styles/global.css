@@ -398,9 +398,32 @@ a.card:hover,
   border-left: 3px solid var(--accent);
   color: var(--text-secondary);
 }
-.prose img {
+.prose img,
+.prose video {
   border-radius: var(--radius-sm);
   margin: 2em auto;
+}
+.prose p:has(> img + img) {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin: 2em 0;
+}
+.prose p:has(> img + img) img {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+}
+.prose p:has(> img + img) img:last-child:nth-child(odd) {
+  grid-column: span 2;
+  aspect-ratio: 16 / 9;
+}
+.prose video {
+  max-height: 80vh;
+  width: auto;
+  background: #000;
 }
 .prose img + em,
 .prose .caption {

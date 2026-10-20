@@ -30,6 +30,8 @@ const SEEN_FILE = join(ROOT, 'scripts', 'seen.json');
 const PENDING_FILE = join(CACHE_DIR, 'pending.json');
 const IMG_DIR = join(ROOT, 'public', 'images', 'tg');
 const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)';
+// Keep the repo lean: clips above this stay on Telegram (the footer links there).
+const VIDEO_MAX_BYTES = 25 * 1024 * 1024;
 
 // ---- html helpers (ported from src/lib/telegram.ts) --------------------------
 const decode = (s) =>
@@ -53,6 +55,22 @@ const toText = (htmlFrag) =>
   )
     .replace(/\n{3,}/g, '\n\n')
     .trim();
+
+// Inner HTML of the first <div class="<cls>…">, matched by div depth so it stops at the
+// text's own closing tag — never runs on into link previews or the reactions bar.
+function innerDiv(html, cls) {
+  const open = html.match(new RegExp(`<div[^>]*class="${cls}\\b[^"]*"[^>]*>`));
+  if (!open) return '';
+  const from = open.index + open[0].length;
+  const tag = /<(\/?)div\b[^>]*>/g;
+  tag.lastIndex = from;
+  let depth = 1;
+  for (let m; (m = tag.exec(html)); ) {
+    depth += m[1] ? -1 : 1;
+    if (depth === 0) return html.slice(from, m.index);
+  }
+  return html.slice(from);
+}
 
 // ---- state -------------------------------------------------------------------
 async function loadSeen() {
@@ -95,13 +113,16 @@ async function fetchPosts() {
     if (!idM) continue;
     const id = Number(idM[1]);
     const dateM = block.match(/datetime="([^"]+)"/);
-    const textM = block.match(/class="tgme_widget_message_text[^"]*"[^>]*>([\s\S]*?)<\/div>\s*(?:<div class="tgme_widget_message_footer|<div class="tgme_widget_message_bubble_reactions)/);
-    // fall back to a looser text capture if the footer anchor isn't present
-    const textFrag = textM ? textM[1] : (block.match(/class="tgme_widget_message_text[^"]*"[^>]*>([\s\S]*?)<\/div>/) || [])[1] || '';
+    const textFrag = innerDiv(block, 'tgme_widget_message_text');
     const photos = [
       ...block.matchAll(/tgme_widget_message_photo_wrap[^"]*"[^>]*background-image:url\('([^']+)'\)/g),
     ].map((m) => m[1]);
     const hasVideo = /tgme_widget_message_video\b/.test(block);
+    // Short clips are served as plain mp4 in the preview — keep them with their poster frame.
+    const videos = [...block.matchAll(/<video src="([^"]+)"/g)].map((m) => decode(m[1]));
+    const posters = [
+      ...block.matchAll(/tgme_widget_message_video_thumb[^"]*"[^>]*background-image:url\('([^']+)'\)/g),
+    ].map((m) => m[1]);
     // Telegram's public preview refuses to render some media (video notes, stories,
     // paid media) — it emits "Please open Telegram to view this post" and NO text.
     // Flag those so autopublish can report them instead of silently dropping them.
@@ -112,6 +133,8 @@ async function fetchPosts() {
       date: dateM ? dateM[1] : null,
       text: textFrag ? toText(textFrag) : '',
       photos,
+      videos,
+      posters,
       hasVideo,
       unreadable,
       link: `https://t.me/${CHANNEL}/${id}`,
@@ -120,10 +143,13 @@ async function fetchPosts() {
   return posts;
 }
 
-async function download(url, dest) {
-  const res = await fetch(url, { headers: { 'User-Agent': UA }, signal: AbortSignal.timeout(20000) });
-  if (!res.ok) throw new Error(`photo ${res.status}`);
+// Returns bytes written, or 0 if the file exceeds maxBytes (nothing is written).
+async function download(url, dest, maxBytes = Infinity) {
+  const res = await fetch(url, { headers: { 'User-Agent': UA }, signal: AbortSignal.timeout(60000) });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  if (Number(res.headers.get('content-length') || 0) > maxBytes) return 0;
   const buf = Buffer.from(await res.arrayBuffer());
+  if (buf.length > maxBytes) return 0;
   await writeFile(dest, buf);
   return buf.length;
 }
@@ -150,6 +176,27 @@ async function pull() {
         console.error(`  ! photo ${p.id}#${i + 1} failed: ${e.message}`);
       }
     }
+    const localVideos = [];
+    for (let i = 0; i < p.videos.length; i++) {
+      const name = `${p.id}-v${i + 1}`;
+      try {
+        const bytes = await download(p.videos[i], join(IMG_DIR, `${name}.mp4`), VIDEO_MAX_BYTES);
+        if (!bytes) {
+          console.error(`  ! video ${p.id}#${i + 1} too large — left on Telegram`);
+          continue;
+        }
+        let poster = null;
+        if (p.posters[i]) {
+          try {
+            await download(p.posters[i], join(IMG_DIR, `${name}.jpg`));
+            poster = `/invest-sema/images/tg/${name}.jpg`;
+          } catch {}
+        }
+        localVideos.push({ src: `/invest-sema/images/tg/${name}.mp4`, poster });
+      } catch (e) {
+        console.error(`  ! video ${p.id}#${i + 1} failed: ${e.message}`);
+      }
+    }
     manifest.push({
       id: p.id,
       date: p.date ? p.date.slice(0, 10) : null,
@@ -158,6 +205,7 @@ async function pull() {
       hasVideo: p.hasVideo,
       unreadable: p.unreadable,
       photos: localPhotos,
+      videos: localVideos,
       text: p.text,
     });
   }
@@ -169,7 +217,7 @@ async function pull() {
   } else {
     console.log(`${manifest.length} new post(s) → ${PENDING_FILE}\n`);
     for (const m of manifest) {
-      console.log(`  #${m.id}  ${m.date}  ${m.words}w  photos:${m.photos.length}${m.hasVideo ? ' +video' : ''}`);
+      console.log(`  #${m.id}  ${m.date}  ${m.words}w  photos:${m.photos.length}${m.videos.length ? `  videos:${m.videos.length}` : m.hasVideo ? ' +video' : ''}`);
       console.log(`     ${m.text.slice(0, 90).replace(/\n/g, ' ')}${m.text.length > 90 ? '…' : ''}`);
     }
     console.log(`\nNext: the agent judges each (Long Read vs Setup), writes the content file verbatim, then runs:`);
