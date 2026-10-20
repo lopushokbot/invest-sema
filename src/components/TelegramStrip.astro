@@ -31,7 +31,7 @@ function truncate(s: string, n = 220): string {
         <a class="card tg-card reveal" href={p.link} target="_blank" rel="noopener">
           <div class="tg-head">
             <span class="tg-badge">
-              <img src={url('logos/telegram.png')} alt="" width="16" height="16" />
+              <img class="tg-ava" src={url('images/avatar.jpg')} alt="" width="28" height="28" loading="lazy" />
               @{SITE.telegram}
             </span>
             <span class="tg-time">{timeAgo(p.date)}</span>
@@ -86,10 +86,16 @@ function truncate(s: string, n = 220): string {
   .tg-badge {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     font-size: 13px;
     font-weight: 600;
     color: #2aabee;
+  }
+  .tg-ava {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
   }
   .tg-time {
     font-size: 12.5px;
