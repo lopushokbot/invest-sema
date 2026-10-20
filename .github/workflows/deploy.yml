@@ -44,7 +44,7 @@ jobs:
             git config user.email "actions@users.noreply.github.com"
             git add -A
             git commit -m "Auto-publish from Telegram ($(date -u +%F))"
-            git push
+            for i in 1 2 3; do git pull --rebase -q && git push && break; sleep 5; done
           else
             echo "No new posts to publish."
           fi

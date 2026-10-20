@@ -59,6 +59,16 @@ const SKIP_RE = [
 
 const has = (t, arr) => arr.some((k) => t.includes(k));
 
+// "Всем привет!" makes a poor headline — use the sentence after a bare greeting.
+const GREETING = /^(всем\s+)?(привет|здравствуйте|добр(ый|ое|ого)\s+\S+)|^(hi|hello|hey)\b/i;
+function titleFrom(text, cap) {
+  const first = firstSentence(text, cap);
+  if (!GREETING.test(first) || first.split(/\s+/).length > 4) return first;
+  const idx = text.indexOf(first);
+  const rest = text.slice(idx + first.length).replace(/^[.!?…\s]+/u, '');
+  return (rest && firstSentence(rest, cap)) || first;
+}
+
 function firstSentence(text, cap) {
   const line = text.split('\n').map((s) => s.trim()).find(Boolean) || text.trim();
   const m = line.match(/^(.{10,}?[.!?…])(\s|$)/u);
@@ -90,19 +100,20 @@ function setupType(t) {
 }
 
 function decide(post) {
-  const t = post.text.toLowerCase();
-  const words = post.words ?? (post.text ? post.text.split(/\s+/).filter(Boolean).length : 0);
+  const text = post.plain ?? post.text; // rich posts: judge the words, not the markdown
+  const t = text.toLowerCase();
+  const words = post.words ?? (text ? text.split(/\s+/).filter(Boolean).length : 0);
   if (post.unreadable) return { publish: false, reason: 'unreadable media', retry: true };
-  if (!post.text || words < 1) return { publish: false, reason: 'empty / media-only' };
-  if (SKIP_RE.some((re) => re.test(post.text))) return { publish: false, reason: 'service/promo/personal' };
+  if (!text || words < 1) return { publish: false, reason: 'empty / media-only' };
+  if (SKIP_RE.some((re) => re.test(text))) return { publish: false, reason: 'service/promo/personal' };
   if (words < PUBLISH_MIN_WORDS) return { publish: false, reason: `too short (${words}w)` };
   if (!has(t, FIN)) return { publish: false, reason: 'no investing signal' };
   return { publish: true, longread: words >= LONGREAD_MIN_WORDS };
 }
 
 function render(post, kind) {
-  const t = post.text;
-  const title = firstSentence(t, 100) || `Пост #${post.id}`;
+  const t = post.plain ?? post.text; // metadata from plain words; body below stays verbatim
+  const title = titleFrom(t, 100) || `Пост #${post.id}`;
   const desc = description(t, 170);
   let markets = pickList(t.toLowerCase(), MARKET_KW);
   let tags = pickList(t.toLowerCase(), TAG_KW);
@@ -120,7 +131,7 @@ function render(post, kind) {
     .map((v) => `\n\n<video src="${v.src}"${v.poster ? ` poster="${v.poster}"` : ''} controls playsinline preload="metadata"></video>`)
     .join('');
   const footer = `\n\n---\n\n*[Оригинал поста в Telegram →](${post.link || `https://t.me/${CH}/${post.id}`})*\n`;
-  return fm.join('\n') + t.trim() + photos + videos + footer;
+  return fm.join('\n') + post.text.trim() + photos + videos + footer;
 }
 
 async function main() {

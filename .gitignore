@@ -5,3 +5,6 @@ dist/
 
 # Transient ingestion cache (pending posts / downloaded before publish)
 scripts/.cache/
+
+# Local secrets (TG_INBOX_BOT_TOKEN)
+.env

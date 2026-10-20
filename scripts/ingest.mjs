@@ -29,6 +29,7 @@ const CACHE_DIR = join(ROOT, 'scripts', '.cache');
 const SEEN_FILE = join(ROOT, 'scripts', 'seen.json');
 const PENDING_FILE = join(CACHE_DIR, 'pending.json');
 const IMG_DIR = join(ROOT, 'public', 'images', 'tg');
+const INBOX_DIR = join(ROOT, 'scripts', 'inbox'); // rich posts collected by tg-inbox.mjs (bot)
 const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)';
 // Keep the repo lean: clips above this stay on Telegram (the footer links there).
 const VIDEO_MAX_BYTES = 25 * 1024 * 1024;
@@ -98,6 +99,20 @@ async function publishedIds() {
   return ids;
 }
 
+// Rich posts the bot captured (scripts/tg-inbox.mjs) — the web preview can't show them.
+async function loadInbox() {
+  const map = new Map();
+  if (!existsSync(INBOX_DIR)) return map;
+  for (const f of await readdir(INBOX_DIR)) {
+    if (!/^\d+\.json$/.test(f)) continue;
+    try {
+      const r = JSON.parse(await readFile(join(INBOX_DIR, f), 'utf-8'));
+      map.set(Number(r.id), r);
+    } catch {}
+  }
+  return map;
+}
+
 // ---- fetch + parse -----------------------------------------------------------
 async function fetchPosts() {
   const res = await fetch(`https://t.me/s/${CHANNEL}`, {
@@ -156,7 +171,9 @@ async function download(url, dest, maxBytes = Infinity) {
 
 // ---- commands ----------------------------------------------------------------
 async function pull() {
-  const [seen, published, posts] = await Promise.all([loadSeen(), publishedIds(), fetchPosts()]);
+  const [seen, published, posts, inbox] = await Promise.all([loadSeen(), publishedIds(), fetchPosts(), loadInbox()]);
+  // Rich posts that already scrolled off the web preview still come through the inbox.
+  for (const id of inbox.keys()) if (!posts.some((p) => p.id === id)) posts.push({ id, photos: [], videos: [] });
   const seenSet = new Set(seen.processed);
   const isNew = (p) => !seenSet.has(p.id) && !published.has(p.id);
   const fresh = posts.filter(isNew).sort((a, b) => a.id - b.id);
@@ -166,6 +183,24 @@ async function pull() {
 
   const manifest = [];
   for (const p of fresh) {
+    const rich = inbox.get(p.id);
+    if (rich) {
+      // Full post from the bot: markdown with photos/videos already placed inline.
+      manifest.push({
+        id: p.id,
+        date: rich.date,
+        link: rich.link,
+        words: rich.text.split(/\s+/).filter(Boolean).length,
+        hasVideo: false,
+        unreadable: false,
+        rich: true,
+        photos: [],
+        videos: [],
+        text: rich.markdown,
+        plain: rich.text,
+      });
+      continue;
+    }
     const localPhotos = [];
     for (let i = 0; i < p.photos.length; i++) {
       const name = i === 0 ? `${p.id}.jpg` : `${p.id}-${i + 1}.jpg`;
@@ -217,7 +252,7 @@ async function pull() {
   } else {
     console.log(`${manifest.length} new post(s) → ${PENDING_FILE}\n`);
     for (const m of manifest) {
-      console.log(`  #${m.id}  ${m.date}  ${m.words}w  photos:${m.photos.length}${m.videos.length ? `  videos:${m.videos.length}` : m.hasVideo ? ' +video' : ''}`);
+      console.log(`  #${m.id}  ${m.date}  ${m.words}w${m.rich ? '  rich (bot inbox)' : ''}  photos:${m.photos.length}${m.videos.length ? `  videos:${m.videos.length}` : m.hasVideo ? ' +video' : ''}`);
       console.log(`     ${m.text.slice(0, 90).replace(/\n/g, ' ')}${m.text.length > 90 ? '…' : ''}`);
     }
     console.log(`\nNext: the agent judges each (Long Read vs Setup), writes the content file verbatim, then runs:`);

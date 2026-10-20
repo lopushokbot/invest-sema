@@ -65,6 +65,23 @@ invest-sema/
      unobservable + no repo write. GitHub CI already reaches t.me (the live feed proves it)
      and pushes via `GITHUB_TOKEN` (`permissions: contents: write`). Verified end-to-end.
 
+- **Rich posts via the channel bot (added 2026-10-20):** posts written with Telegram's rich
+  editor (inline photos between paragraphs, headings, tables — e.g. #335) are invisible to
+  the t.me preview. A dedicated bot (NOT @chepuliabot — that one is polled by Claude Code's
+  Telegram channel, a second poller would steal its updates) is an admin of @investsyoma
+  and receives them as `message.rich_message.blocks` (Bot API 10.1+).
+  `.github/workflows/tg-inbox.yml` (every 2h, at :17) runs `scripts/tg-inbox.mjs fetch` →
+  `scripts/inbox/<id>.json` (verbatim markdown via `scripts/lib/rich.mjs`, photos/videos
+  downloaded to `public/images/tg/` in their inline positions) → commit+push → `ack`
+  (confirms with Telegram only after the push, so nothing is lost). `ingest.mjs pull`
+  prefers the inbox copy over the unreadable preview; `autopublish.mjs` judges/titles it
+  from the plain text and writes the markdown body. Token: GitHub secret
+  `TG_INBOX_BOT_TOKEN` (+ local `.env`, gitignored). Without the secret the workflow
+  logs "skipping" and everything else behaves as before.
+- Titles skip a bare greeting ("Всем привет!" → next sentence) — `titleFrom()`.
+- Social: X `@_s1mooon_` (`SITE.x`/`SITE.xUrl`) on About (text + button), Telegram page
+  (button), footer.
+
 ## Deployment
 - **Status: LIVE (deployed 2026-07-23) → https://lopushokbot.github.io/invest-sema/**
 - Repo `lopushokbot/invest-sema` (public), Pages source = GitHub Actions.
@@ -150,7 +167,7 @@ invest-sema/
   `## Минусы / риски` → `## Когда продам` → `## Итог`. Text is Sema's own (from his
   "BTC memo.docx"), kept verbatim apart from markdown structure. Current memos: BTC +
   ETH (Crypto), S&P 500 (US). Home has a "Position Memos" strip (latest 3); Memos is in
-  the header nav + footer; memos are in the RSS feed and the admin (third CMS section).
+  the footer (removed from the header nav 2026-10-20 per Sema); memos are in the RSS feed and the admin (third CMS section).
 - About page: Sema's own copy (title "(Hopefully) Useful thoughts about markets", intro,
   "How I think", "The fine print"). "My small investment-related projects" section has 5
   cards — DeFi Course, Stablecoin APY Dashboard, Russian Portfolio Dashboard, US

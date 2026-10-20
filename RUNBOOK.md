@@ -56,6 +56,33 @@ push to the repo and its runs weren't observable. Do not re-enable; CI is the me
 
 ---
 
+## Task: Rich posts (Telegram bot inbox)
+
+### Setup status
+Code + workflow live. **Needs the bot**: Sema creates it in @BotFather, adds it as an
+admin of @investsyoma, sends the token → `gh secret set TG_INBOX_BOT_TOKEN --repo
+lopushokbot/invest-sema` and put `TG_INBOX_BOT_TOKEN=…` in local `.env`. Verify:
+`curl -s https://api.telegram.org/bot<token>/getMe`, then `gh workflow run tg-inbox.yml`.
+Rights: the bot only needs to be an admin (receive posts) — untick everything else.
+
+### How it works
+`tg-inbox.yml` every 2h → `node scripts/tg-inbox.mjs fetch` (getUpdates, only
+channel_post/edited_channel_post from @investsyoma that have `rich_message`) → writes
+`scripts/inbox/<id>.json` + media → commit/push → `node scripts/tg-inbox.mjs ack`.
+Daily deploy run publishes it via ingest → autopublish like any post. Edits made before
+publishing overwrite the inbox copy. Telegram holds bot updates only ~24h — if the
+workflow is broken for >1 day, posts from that window must be recovered by hand.
+
+### Test without network
+`node scripts/tg-inbox.mjs test <saved getUpdates.json>` prints the markdown it would write.
+
+### Manual recovery (bot missed it)
+Open `tg://resolve?domain=investsyoma&post=<id>` in the Mac app → right-click → Copy Text
+→ `LANG=en_US.UTF-8 pbpaste`; photos: click → in-app viewer → `screencapture` + crop.
+Don't do this while Sema is actively using the Mac — focus jumps break the clicks.
+
+---
+
 ## Admin panel (Sveltia CMS) — how Sema posts himself
 
 The panel lives at `public/admin/` (config in `public/admin/config.yml`). Two sections:
@@ -214,6 +241,8 @@ Sema has reviewed the local site and said deploy.
 ---
 
 ## Changelog
+
+- 2026-10-20: Oct long read = #335 (rich post, recovered from the app); NYC #336 skipped per Sema (lifestyle). Bot inbox for rich posts (tg-inbox.yml + scripts/lib/rich.mjs). Video embeds, 2-col photo grid, reaction/link-preview leak fix (innerDiv). Memos out of header nav; X link on About/Telegram/footer.
 
 - **2026-09-07 (later)** — Real logos on memo cards per Sema ("you have generated purple things there"). New optional `logo` frontmatter field (schema + admin image widget + `MemoCard` renders it in place of the ticker tile). Added `public/logos/memos/{btc,eth,spx}.svg`: BTC = official Wikimedia `Bitcoin.svg` (viewBox added); ETH = official `Ethereum_logo_2014.svg` polygons on the brand's light rounded square; SPX = the S, &, P paths from Commons `S&P_Global_logo.svg` in white on S&P red with the signature bar (no square S&P 500 mark exists on Commons; Google Images results were the Brandfetch tile, which this reproduces from the official vector). Verified light + dark.
 - **2026-09-07** — **Position Memos section (Sema's request).** New `memos` content collection + `MemoCard` + `/memos/` page divided into 5 fixed market sections (US, UAE, Russia, Crypto, Commodities — `MEMO_MARKETS` in config.ts) with jump pills, per-section counts and dashed empty states; `/memos/<slug>/` articles via the Article layout (eyebrow "Position Memo · <market>", status pill). Imported the 3 memos from `~/Downloads/Telegram Desktop/BTC memo.docx` verbatim (markdown structure added): BTC → Crypto, S&P 500 → US, ETH → Crypto, all `status: Holding`, dated 2026-09-07. Wired in: header nav "Memos" + footer "Position Memos", home strip "Position Memos" (latest 3, Telegram section moved to the alt background), RSS items, third Sveltia CMS section in `public/admin/config.yml`. About page: the DeFi Alpha Chat card was **replaced** by a Position Memos card (internal link, inline doc icon); `SITE.projects.defiAlphaChat` removed.
