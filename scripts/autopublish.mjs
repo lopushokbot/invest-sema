@@ -78,7 +78,11 @@ function firstSentence(text, cap) {
 }
 function description(text, cap) {
   const flat = text.replace(/\s+/g, ' ').trim();
-  const sentences = flat.match(/[^.!?…]+[.!?…]+/gu) || [flat];
+  let sentences = flat.match(/[^.!?…]+[.!?…]+/gu) || [flat];
+  // Drop a bare opening greeting ("Всем привет!") — cards already show who's talking.
+  if (sentences.length > 1 && GREETING.test(sentences[0].trim()) && sentences[0].trim().split(/\s+/).length <= 4) {
+    sentences = sentences.slice(1);
+  }
   let out = '';
   for (const s of sentences.slice(0, 3)) {
     if ((out + s).length > cap) break;

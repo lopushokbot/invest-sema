@@ -18,9 +18,13 @@ function timeAgo(d: Date): string {
   return months === 1 ? '1mo ago' : `${months}mo ago`;
 }
 
-function truncate(s: string, n = 220): string {
-  if (s.length <= n) return s;
-  return s.slice(0, n).replace(/\s+\S*$/, '') + '…';
+// One standard block per post: blank-line runs collapsed, bare URLs shown as their domain.
+function clean(s: string): string {
+  return s
+    .replace(/https?:\/\/(?:www\.)?([^\s/]+)\S*/g, '$1')
+    .replace(/[ \t]+\n/g, '\n')
+    .replace(/\n{2,}/g, '\n')
+    .trim();
 }
 ---
 
@@ -41,7 +45,7 @@ function truncate(s: string, n = 220): string {
               <img src={p.photo} alt="" loading="lazy" referrerpolicy="no-referrer" />
             </div>
           )}
-          {p.text && <p class="tg-text">{truncate(p.text)}</p>}
+          {p.text && <p class={`tg-text ${p.photo ? 'has-photo' : ''}`}>{clean(p.text)}</p>}
           <div class="tg-foot">
             {p.views && <span class="tg-views">{p.views} views</span>}
             <span class="tg-open">Open in Telegram →</span>
@@ -71,8 +75,9 @@ function truncate(s: string, n = 220): string {
   .tg-card {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    padding: 22px;
+    gap: 14px;
+    padding: 24px;
+    min-width: 0;
     color: inherit;
   }
   .tg-card:hover {
@@ -90,6 +95,7 @@ function truncate(s: string, n = 220): string {
     font-size: 13px;
     font-weight: 600;
     color: #2aabee;
+    font-variant-numeric: tabular-nums;
   }
   .tg-ava {
     width: 28px;
@@ -117,13 +123,22 @@ function truncate(s: string, n = 220): string {
     line-height: 1.55;
     color: var(--text);
     white-space: pre-line;
+    overflow-wrap: anywhere;
+    display: -webkit-box;
+    -webkit-line-clamp: 8;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .tg-text.has-photo {
+    -webkit-line-clamp: 3;
   }
   .tg-foot {
     margin-top: auto;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding-top: 4px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
   }
   .tg-views {
     font-size: 12.5px;

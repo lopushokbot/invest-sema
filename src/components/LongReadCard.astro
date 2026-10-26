@@ -33,6 +33,7 @@ const mins = readingTime(post.body);
 <style>
   .lr-card {
     display: flex;
+    height: 100%;
     flex-direction: column;
     overflow: hidden;
     color: inherit;
@@ -83,10 +84,17 @@ const mins = readingTime(post.body);
     line-height: 1.55;
     color: var(--text-secondary);
     max-width: 60ch;
+    overflow-wrap: anywhere;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
   .lr-more {
+    display: block;
     margin-top: auto;
-    padding-top: 4px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
     font-size: 14.5px;
     font-weight: 500;
     color: var(--accent);

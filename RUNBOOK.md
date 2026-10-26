@@ -242,6 +242,7 @@ Sema has reviewed the local site and said deploy.
 
 ## Changelog
 
+- 2026-10-26: About avatar photo removed (Sema). Standardized post cards: every card fills its grid cell (equal heights per row), same divider-footer on setup/long-read/memo/Telegram cards, clamped titles/descriptions, Telegram previews collapse blank lines + show bare URLs as domain (fixes overflow), 8-line clamp (3 with photo). Retitled 3 "Всем привет!" posts (#318, #319, #334); autopublish `description()` now drops a bare opening greeting.
 - 2026-10-20: Oct long read = #335 (rich post, recovered from the app); NYC #336 skipped per Sema (lifestyle). Bot inbox for rich posts (tg-inbox.yml + scripts/lib/rich.mjs). Video embeds, 2-col photo grid, reaction/link-preview leak fix (innerDiv). Memos out of header nav; X link on About/Telegram/footer.
 
 - **2026-09-07 (later)** — Real logos on memo cards per Sema ("you have generated purple things there"). New optional `logo` frontmatter field (schema + admin image widget + `MemoCard` renders it in place of the ticker tile). Added `public/logos/memos/{btc,eth,spx}.svg`: BTC = official Wikimedia `Bitcoin.svg` (viewBox added); ETH = official `Ethereum_logo_2014.svg` polygons on the brand's light rounded square; SPX = the S, &, P paths from Commons `S&P_Global_logo.svg` in white on S&P red with the signature bar (no square S&P 500 mark exists on Commons; Google Images results were the Brandfetch tile, which this reproduces from the official vector). Verified light + dark.

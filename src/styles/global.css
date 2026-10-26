@@ -362,6 +362,10 @@ a.card:hover,
   font-size: 18px;
   line-height: 1.7;
   color: var(--text);
+  overflow-wrap: break-word;
+}
+.prose a {
+  overflow-wrap: anywhere;
 }
 .prose > * + * {
   margin-top: 1.4em;
