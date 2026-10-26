@@ -9,15 +9,6 @@ import { SITE, url } from '../lib/config';
 >
   <section class="page-hero">
     <div class="container narrow">
-      <a
-        class="about-avatar reveal"
-        href={SITE.xUrl}
-        target="_blank"
-        rel="noopener"
-        aria-label={`Sema on X (@${SITE.x})`}
-      >
-        <img src={url('images/avatar-about.jpg')} alt="Sema" width="120" height="120" />
-      </a>
       <p class="eyebrow reveal">About</p>
       <h1 class="reveal">(Hopefully) Useful<br />thoughts about markets</h1>
     </div>
@@ -136,33 +127,6 @@ import { SITE, url } from '../lib/config';
 <style>
   .page-hero {
     padding: 88px 0 40px;
-  }
-  .about-avatar {
-    display: block;
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    margin-bottom: 28px;
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16);
-    transition: transform 0.4s ease, box-shadow 0.4s ease;
-  }
-  .about-avatar:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.22);
-  }
-  .about-avatar img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    object-fit: cover;
-  }
-  @media (max-width: 600px) {
-    .about-avatar {
-      width: 96px;
-      height: 96px;
-      margin-bottom: 22px;
-    }
   }
   .narrow {
     max-width: calc(var(--article-width) + 48px);
